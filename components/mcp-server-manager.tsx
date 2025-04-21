@@ -67,6 +67,7 @@ export interface MCPServer {
     args?: string[];
     env?: KeyValuePair[];
     headers?: KeyValuePair[];
+    description?: string;
 }
 
 interface MCPServerManagerProps {
@@ -398,36 +399,44 @@ export const MCPServerManager = ({
                 </DialogHeader>
 
                 {view === 'list' ? (
-                    <div className="flex-1 overflow-hidden flex flex-col pb-14">
+                    <div className="flex-1 overflow-hidden flex flex-col">
                         {servers.length > 0 ? (
                             <div className="flex-1 overflow-hidden flex flex-col">
                                 <div className="flex-1 overflow-hidden flex flex-col">
-                                    <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center justify-between mb-3">
                                         <h3 className="text-sm font-medium">Available Servers</h3>
                                         <span className="text-xs text-muted-foreground">
                                             Select multiple servers to combine their tools
                                         </span>
                                     </div>
-                                    <div className="overflow-y-auto pr-1 flex-1 gap-2 flex flex-col">
-                                        {servers.map((server) => {
+                                    <div className="overflow-y-auto pr-1 flex-1 gap-2.5 flex flex-col pb-16">
+                                        {servers
+                                            .sort((a, b) => {
+                                                const aActive = selectedServers.includes(a.id);
+                                                const bActive = selectedServers.includes(b.id);
+                                                if (aActive && !bActive) return -1;
+                                                if (!aActive && bActive) return 1;
+                                                return 0;
+                                            })
+                                            .map((server) => {
                                             const isActive = selectedServers.includes(server.id);
                                             return (
                                                 <div
                                                     key={server.id}
                                                     className={`
-                            relative flex flex-col p-3 rounded-lg transition-colors
+                            relative flex flex-col p-3.5 rounded-xl transition-colors
                             border ${isActive
                                                             ? 'border-primary bg-primary/10'
                                                             : 'border-border hover:border-primary/30 hover:bg-primary/5'}
                           `}
                                                 >
                                                     {/* Server Header with Type Badge and Delete Button */}
-                                                    <div className="flex items-center justify-between mb-1.5">
+                                                    <div className="flex items-center justify-between mb-2">
                                                         <div className="flex items-center gap-2">
                                                             {server.type === 'sse' ? (
-                                                                <Globe className="h-4 w-4 text-primary flex-shrink-0" />
+                                                                <Globe className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             ) : (
-                                                                <Terminal className="h-4 w-4 text-primary flex-shrink-0" />
+                                                                <Terminal className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             )}
                                                             <h4 className="text-sm font-medium truncate max-w-[220px]">{server.name}</h4>
                                                             {hasAdvancedConfig(server) && (
@@ -437,7 +446,7 @@ export const MCPServerManager = ({
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                                                            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                                                                 {server.type.toUpperCase()}
                                                             </span>
                                                             <button
@@ -458,7 +467,7 @@ export const MCPServerManager = ({
                                                     </div>
 
                                                     {/* Server Details */}
-                                                    <p className="text-xs text-muted-foreground mb-2 truncate">
+                                                    <p className="text-xs text-muted-foreground mb-2.5 truncate">
                                                         {server.type === 'sse'
                                                             ? server.url
                                                             : `${server.command} ${server.args?.join(' ')}`
@@ -468,7 +477,7 @@ export const MCPServerManager = ({
                                                     {/* Action Button */}
                                                     <Button
                                                         size="sm"
-                                                        className="w-full mt-0.5 gap-1.5"
+                                                        className="w-full gap-1.5 hover:text-black hover:dark:text-white rounded-lg"
                                                         variant={isActive ? "default" : "outline"}
                                                         onClick={() => toggleServer(server.id)}
                                                     >
@@ -870,14 +879,14 @@ export const MCPServerManager = ({
                 )}
 
                 {/* Persistent fixed footer with buttons */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border flex justify-between">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border flex justify-between z-10">
                     {view === 'list' ? (
                         <>
                             <Button
                                 variant="outline"
                                 onClick={clearAllServers}
                                 size="sm"
-                                className="gap-1.5"
+                                className="gap-1.5 hover:text-black hover:dark:text-white"
                                 disabled={selectedServers.length === 0}
                             >
                                 <X className="h-3.5 w-3.5" />

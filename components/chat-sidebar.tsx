@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -15,24 +15,31 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuBadge,
-    SidebarSeparator,
     useSidebar
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { type Chat } from "@/lib/db/schema";
 import Image from "next/image";
 import { MCPServerManager, type MCPServer } from "./mcp-server-manager";
 import { ThemeToggle } from "./theme-toggle";
-import { useTheme } from "next-themes";
 import { getUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { useChats } from "@/lib/hooks/use-chats";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function ChatSidebar() {
     const router = useRouter();
@@ -72,7 +79,6 @@ export function ChatSidebar() {
 
     // Get active MCP servers status
     const activeServersCount = selectedMcpServers.length;
-    const multipleServersActive = activeServersCount > 1;
 
     // Show loading state if user ID is not yet initialized
     if (!userId) {
@@ -94,15 +100,15 @@ export function ChatSidebar() {
                 </div>
             </SidebarHeader>
             
-            <SidebarContent className="pt-4">
-                <SidebarGroup>
+            <SidebarContent className="flex flex-col h-[calc(100vh-8rem)]">
+                <SidebarGroup className="flex-1 min-h-0">
                     <SidebarGroupLabel className={cn(
-                        "px-4 mb-1 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
+                        "px-4 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
                         isCollapsed ? "sr-only" : ""
                     )}>
                         Chats
                     </SidebarGroupLabel>
-                    <SidebarGroupContent>
+                    <SidebarGroupContent className="overflow-y-auto pt-1">
                         <SidebarMenu>
                             {isLoading ? (
                                 <div className={`flex items-center justify-center py-4 ${isCollapsed ? "" : "px-4"}`}>
@@ -112,20 +118,15 @@ export function ChatSidebar() {
                                     )}
                                 </div>
                             ) : chats.length === 0 ? (
-                                <div className={`flex flex-col items-center gap-2 py-6 ${isCollapsed ? "" : "px-4"}`}>
+                                <div className={`flex items-center justify-center py-3 ${isCollapsed ? "" : "px-4"}`}>
                                     {isCollapsed ? (
-                                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
-                                            <Sparkles className="h-3 w-3 text-secondary-foreground" />
+                                        <div className="flex h-6 w-6 items-center justify-center rounded-md border border-border/50 bg-background/50">
+                                            <MessageSquare className="h-3 w-3 text-muted-foreground" />
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center text-center py-4">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/60 mb-3">
-                                                <Sparkles className="h-5 w-5 text-secondary-foreground" />
-                                            </div>
-                                            <span className="text-sm font-medium text-foreground/90">No chats yet</span>
-                                            <span className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                                                Start a new conversation below
-                                            </span>
+                                        <div className="flex items-center gap-3 w-full px-3 py-2 rounded-md border border-dashed border-border/50 bg-background/50">
+                                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-xs text-muted-foreground font-normal">No conversations yet</span>
                                         </div>
                                     )}
                                 </div>
@@ -137,7 +138,7 @@ export function ChatSidebar() {
                                             tooltip={isCollapsed ? chat.title : undefined}
                                             data-active={pathname === `/chat/${chat.id}`}
                                             className={cn(
-                                                "transition-all hover:bg-secondary/50 active:bg-secondary/70",
+                                                "transition-all hover:bg-primary/10 active:bg-primary/15",
                                                 pathname === `/chat/${chat.id}` ? "bg-secondary/60 hover:bg-secondary/60" : ""
                                             )}
                                         >
@@ -179,15 +180,15 @@ export function ChatSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
                 
-                <div className="relative my-3">
+                <div className="relative my-0">
                     <div className="absolute inset-x-0">
                         <Separator className="w-full h-px bg-border/40" />
                     </div>
                 </div>
                 
-                <SidebarGroup>
+                <SidebarGroup className="flex-shrink-0">
                     <SidebarGroupLabel className={cn(
-                        "px-4 mb-1 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
+                        "px-4 pt-0 text-xs font-medium text-muted-foreground/80 uppercase tracking-wider",
                         isCollapsed ? "sr-only" : ""
                     )}>
                         MCP Servers
@@ -205,7 +206,7 @@ export function ChatSidebar() {
                                 >
                                     <ServerIcon className={cn(
                                         "h-4 w-4 flex-shrink-0",
-                                        activeServersCount > 0 ? "text-green-500" : "text-muted-foreground"
+                                        activeServersCount > 0 ? "text-primary" : "text-muted-foreground"
                                     )} />
                                     {!isCollapsed && (
                                         <span className="flex-grow text-sm text-foreground/80">MCP Servers</span>
@@ -244,18 +245,90 @@ export function ChatSidebar() {
                         {!isCollapsed && <span>New Chat</span>}
                     </Button>
                     
-                    <div className={`flex ${isCollapsed ? "flex-col" : ""} gap-2 ${isCollapsed ? "items-center" : "justify-between items-center"}`}>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-md hover:bg-secondary/50 text-muted-foreground hover:text-foreground"
-                            onClick={() => setMcpSettingsOpen(true)}
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                            {isCollapsed ? (
+                                <Button
+                                    variant="ghost"
+                                    className="w-8 h-8 p-0 flex items-center justify-center"
+                                >
+                                    <Avatar className="h-6 w-6 rounded-lg bg-secondary/60">
+                                        <AvatarFallback className="rounded-lg text-xs font-medium text-secondary-foreground">
+                                            {userId.substring(0, 2).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            ) : (
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full justify-between font-normal bg-transparent border border-border/60 shadow-none px-2 h-10 hover:bg-secondary/50"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Avatar className="h-7 w-7 rounded-lg bg-secondary/60">
+                                            <AvatarFallback className="rounded-lg text-sm font-medium text-secondary-foreground">
+                                                {userId.substring(0, 2).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="grid text-left text-sm leading-tight">
+                                            <span className="truncate font-medium text-foreground/90">User ID</span>
+                                            <span className="truncate text-xs text-muted-foreground">{userId.substring(0, 16)}...</span>
+                                        </div>
+                                    </div>
+                                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+                            )}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="w-56 rounded-lg"
+                            side={isCollapsed ? "top" : "top"}
+                            align={isCollapsed ? "start" : "end"}
+                            sideOffset={8}
                         >
-                            <Settings className="h-4 w-4" />
-                            <span className="sr-only">MCP Settings</span>
-                        </Button>
-                        <ThemeToggle className="hover:bg-secondary/50 text-muted-foreground hover:text-foreground" />
-                    </div>
+                            <DropdownMenuLabel className="p-0 font-normal">
+                                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                    <Avatar className="h-8 w-8 rounded-lg bg-secondary/60">
+                                        <AvatarFallback className="rounded-lg text-sm font-medium text-secondary-foreground">
+                                            {userId.substring(0, 2).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="grid flex-1 text-left text-sm leading-tight">
+                                        <span className="truncate font-semibold text-foreground/90">User ID</span>
+                                        <span className="truncate text-xs text-muted-foreground">{userId}</span>
+                                    </div>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
+                                    navigator.clipboard.writeText(userId);
+                                    toast.success("User ID copied to clipboard");
+                                }}>
+                                    <Copy className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    Copy User ID
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
+                                    setMcpSettingsOpen(true);
+                                }}>
+                                    <Settings className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    MCP Settings
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center">
+                                            <Sparkles className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                            Theme
+                                        </div>
+                                        <ThemeToggle className="h-6 w-6" />
+                                    </div>
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 
                 <MCPServerManager

@@ -11,6 +11,7 @@ import { eq, and } from 'drizzle-orm';
 
 import { experimental_createMCPClient as createMCPClient, MCPTransport } from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
+import { spawn } from "child_process";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -75,8 +76,8 @@ export async function POST(req: Request) {
     isNewChat = true;
   }
 
-  // Initialize tools with Composio tools
-  let tools = { ...composioTools };
+  // Initialize tools
+  let tools = {};
   const mcpClients: any[] = [];
   
   // Process each MCP server configuration
@@ -111,6 +112,23 @@ export async function POST(req: Request) {
         if (mcpServer.env && mcpServer.env.length > 0) {
           mcpServer.env.forEach(envVar => {
             if (envVar.key) env[envVar.key] = envVar.value || '';
+          });
+        }
+
+        // if python is passed in the command, install the python package mentioned in args after -m with subprocess or use regex to find the package name
+        if (mcpServer.command.includes('python3')) {
+          const packageName = mcpServer.args[mcpServer.args.indexOf('-m') + 1];
+          console.log("installing python package", packageName);
+          const subprocess = spawn('pip3', ['install', packageName]);
+          subprocess.on('close', (code: number) => {
+            if (code !== 0) {
+              console.error(`Failed to install python package: ${code}`);
+            }
+          });
+          // wait for the subprocess to finish
+          await new Promise((resolve, reject) => {
+            subprocess.on('close', resolve);
+            console.log("installed python package", packageName);
           });
         }
         
@@ -209,6 +227,10 @@ export async function POST(req: Request) {
       // Step 2: Save all messages
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
+      // close all mcp clients
+      // for (const client of mcpClients) {
+      //   await client.close();
+      // }
     }
   });
 

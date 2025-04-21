@@ -182,7 +182,7 @@ export default function Chat() {
   const isLoading = status === "streaming" || status === "submitted" || isLoadingChat;
 
   return (
-    <div className="h-dvh flex flex-col justify-center py-4 w-full max-w-3xl">
+    <div className="h-dvh flex flex-col justify-center w-full max-w-3xl mx-auto px-4 sm:px-6 md:py-4">
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
@@ -203,12 +203,12 @@ export default function Chat() {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0 pb-2">
             <Messages messages={messages} isLoading={isLoading} status={status} />
           </div>
           <form
             onSubmit={handleFormSubmit}
-            className="mt-4 w-full max-w-2xl mx-auto"
+            className="mt-2 w-full mx-auto mb-4"
           >
             <Textarea
               selectedModel={selectedModel}
