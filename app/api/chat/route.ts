@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
   // Check if chat already exists for the given ID
   // If not, we'll create it in onFinish
-  let isNewChat = false;
+  var isNewChat = false;
   if (chatId) {
     try {
       const existingChat = await db.query.chats.findFirst({
@@ -186,6 +186,8 @@ export async function POST(req: Request) {
     You can run multiple steps using all the tools!!!!
     Make sure to use the right tool to respond to the user's question.
 
+    Multiple tools can be used in a single response and multiple steps can be used to answer the user's question.
+
     ## Response Format
     - Markdown is supported.
     - Respond according to tool's response.
@@ -198,33 +200,18 @@ export async function POST(req: Request) {
     onError: (error) => {
       console.error(JSON.stringify(error, null, 2));
     },
-    async onFinish({ response, steps, toolCalls, toolResults }) {
-      console.log("onFinish", response.messages.map(m => {
-        return {
-          id: m.id,
-          content: JSON.stringify(m.content),
-          role: m.role,
-        }
-      }));
-      console.log("steps", steps);
-      console.log("toolCalls", toolCalls);
-      console.log("toolResults", toolResults);
-      
-      // Combine messages for processing
+    async onFinish({ response }) {
       const allMessages = appendResponseMessages({
         messages,
         responseMessages: response.messages,
       });
       
-      // Step 1: Save chat with messages for proper title generation
       await saveChat({
         id,
         userId,
         messages: allMessages,
-        // No title specified - will be generated
       });
       
-      // Step 2: Save all messages
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
       // close all mcp clients

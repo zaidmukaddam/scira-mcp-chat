@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Image from "next/image";
-import { MCPServerManager, type MCPServer } from "./mcp-server-manager";
+import { MCPServerManager } from "./mcp-server-manager";
 import { ThemeToggle } from "./theme-toggle";
 import { getUserId, updateUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
@@ -50,18 +50,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMCP } from "@/lib/context/mcp-context";
 
 export function ChatSidebar() {
     const router = useRouter();
     const pathname = usePathname();
     const [userId, setUserId] = useState<string>('');
-    const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(STORAGE_KEYS.MCP_SERVERS, []);
-    const [selectedMcpServers, setSelectedMcpServers] = useLocalStorage<string[]>(STORAGE_KEYS.SELECTED_MCP_SERVERS, []);
     const [mcpSettingsOpen, setMcpSettingsOpen] = useState(false);
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
     const [editUserIdOpen, setEditUserIdOpen] = useState(false);
     const [newUserId, setNewUserId] = useState('');
+
+    // Get MCP server data from context
+    const { mcpServers, setMcpServers, selectedMcpServers, setSelectedMcpServers } = useMCP();
 
     // Initialize userId
     useEffect(() => {

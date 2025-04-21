@@ -40,12 +40,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from "./ui/accordion";
-
-// Key-value pair for environment variables and headers
-interface KeyValuePair {
-    key: string;
-    value: string;
-}
+import { KeyValuePair, MCPServer } from "@/lib/context/mcp-context";
 
 // Default template for a new MCP server
 const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
@@ -57,18 +52,6 @@ const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
     env: [],
     headers: []
 };
-
-export interface MCPServer {
-    id: string;
-    name: string;
-    url: string;
-    type: 'sse' | 'stdio';
-    command?: string;
-    args?: string[];
-    env?: KeyValuePair[];
-    headers?: KeyValuePair[];
-    description?: string;
-}
 
 interface MCPServerManagerProps {
     servers: MCPServer[];

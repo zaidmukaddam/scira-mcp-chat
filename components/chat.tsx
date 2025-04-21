@@ -9,31 +9,15 @@ import { Messages } from "./messages";
 import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import { getUserId } from "@/lib/user-id";
-import { useLocalStorageValue, useLocalStorage } from "@/lib/hooks/use-local-storage";
+import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
+import { useMCP } from "@/lib/context/mcp-context";
 
-// Define types for MCP server
-interface KeyValuePair {
-  key: string;
-  value: string;
-}
-
-interface MCPServer {
-  id: string;
-  name: string;
-  url: string;
-  type: 'sse' | 'stdio';
-  command?: string;
-  args?: string[];
-  env?: KeyValuePair[];
-  headers?: KeyValuePair[];
-}
-
-
+// Type for chat data from DB
 interface ChatData {
   id: string;
   messages: DBMessage[];
@@ -51,9 +35,8 @@ export default function Chat() {
   const [userId, setUserId] = useState<string>('');
   const [generatedChatId, setGeneratedChatId] = useState<string>('');
   
-  // Get MCP server data from localStorage via our custom hooks
-  const mcpServers = useLocalStorageValue<MCPServer[]>(STORAGE_KEYS.MCP_SERVERS, []);
-  const selectedMcpServers = useLocalStorageValue<string[]>(STORAGE_KEYS.SELECTED_MCP_SERVERS, []);
+  // Get MCP server data from context
+  const { mcpServersForApi } = useMCP();
   
   // Initialize userId
   useEffect(() => {
@@ -98,23 +81,6 @@ export default function Chat() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false
   });
-
-  // Memoize MCP server configuration for API
-  const mcpServersForApi = useMemo(() => {
-    if (!selectedMcpServers.length) return [];
-    
-    return selectedMcpServers
-      .map(id => mcpServers.find(server => server.id === id))
-      .filter((server): server is MCPServer => Boolean(server))
-      .map(server => ({
-        type: server.type,
-        url: server.url,
-        command: server.command,
-        args: server.args,
-        env: server.env,
-        headers: server.headers
-      }));
-  }, [mcpServers, selectedMcpServers]);
   
   // Prepare initial messages from query data
   const initialMessages = useMemo(() => {

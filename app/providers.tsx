@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
+import { MCPProvider } from "@/lib/context/mcp-context";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -32,10 +33,12 @@ export function Providers({ children }: { children: ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        <SidebarProvider defaultOpen={sidebarOpen} open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          {children}
-          <Toaster position="top-center" richColors />
-        </SidebarProvider>
+        <MCPProvider>
+          <SidebarProvider defaultOpen={sidebarOpen} open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            {children}
+            <Toaster position="top-center" richColors />
+          </SidebarProvider>
+        </MCPProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
