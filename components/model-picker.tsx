@@ -38,6 +38,10 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         return <Sparkles className="h-3 w-3 text-yellow-500" />;
       case 'openai':
         return <Zap className="h-3 w-3 text-green-500" />;
+      case 'google':
+        return <Zap className="h-3 w-3 text-red-500" />;
+      case 'groq':
+        return <Sparkles className="h-3 w-3 text-blue-500" />;
       default:
         return <Info className="h-3 w-3 text-blue-500" />;
     }
