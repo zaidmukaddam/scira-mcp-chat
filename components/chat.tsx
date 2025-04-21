@@ -208,7 +208,7 @@ export default function Chat() {
           </div>
           <form
             onSubmit={handleFormSubmit}
-            className="mt-2 w-full mx-auto mb-4"
+            className="mt-2 w-full mx-auto mb-4 sm:mb-auto"
           >
             <Textarea
               selectedModel={selectedModel}
