@@ -7,8 +7,9 @@
 </p>
 
 <p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#mcp-server-configuration"><strong>MCP Configuration</strong></a> ·
+  <a href="#features"><strong>Features</strong></a> •
+  <a href="#mcp-server-configuration"><strong>MCP Configuration</strong></a> •
+  <a href="#license"><strong>License</strong></a>
 </p>
 <br/>
 
