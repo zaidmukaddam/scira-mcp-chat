@@ -11,13 +11,13 @@ export const Messages = ({
   isLoading: boolean;
   status: "error" | "submitted" | "streaming" | "ready";
 }) => {
-  const [containerRef, endRef] = useScrollToBottom();
+  // const [containerRef, endRef] = useScrollToBottom();
   return (
     <div
       className="h-full overflow-y-auto no-scrollbar"
-      ref={containerRef}
+      // ref={containerRef}
     >
-      <div className="max-w-xl mx-auto py-4">
+      <div className="max-w-lg sm:max-w-3xl mx-auto py-4">
         {messages.map((m, i) => (
           <Message
             key={i}
@@ -27,7 +27,7 @@ export const Messages = ({
             status={status}
           />
         ))}
-        <div className="h-1" ref={endRef} />
+        {/* <div className="h-1" ref={endRef} /> */}
       </div>
     </div>
   );

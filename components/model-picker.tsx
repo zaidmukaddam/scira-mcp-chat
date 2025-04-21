@@ -109,20 +109,20 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
   };
 
   return (
-    <div className="absolute bottom-2 left-2">
+    <div className="absolute bottom-2 left-2 z-10">
       <Select 
         value={validModelId} 
         onValueChange={handleModelChange} 
         defaultValue={validModelId}
       >
         <SelectTrigger 
-          className="w-48 px-3 h-9 rounded-full group border-border/80 bg-background/80 backdrop-blur-sm hover:bg-muted/30 transition-all duration-200"
+          className="max-w-[150px] sm:max-w-none sm:w-48 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-border/80 bg-background/80 backdrop-blur-sm hover:bg-muted/30 transition-all duration-200"
         >
           <SelectValue 
             placeholder="Select model" 
-            className="text-xs font-medium flex items-center gap-2"
+            className="text-xs font-medium flex items-center gap-1 sm:gap-2"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {getProviderIcon(modelDetails[validModelId].provider)}
               <TextMorph>{modelDetails[validModelId].name}</TextMorph>
             </div>
@@ -130,12 +130,11 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         </SelectTrigger>
         <SelectContent
           align="start"
-          className="bg-background/95 dark:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0"
-          style={{ width: "485px" }}
+          className="bg-background/95 dark:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0 w-[280px] sm:w-[350px] md:w-[485px]"
         >
-          <div className="grid grid-cols-[170px_1fr] items-start gap-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] md:grid-cols-[170px_1fr] items-start">
             {/* Model selector column */}
-            <div className="border-r border-border/40 bg-muted/20 p-2">
+            <div className="sm:border-r border-border/40 bg-muted/20 p-2">
               <SelectGroup className="space-y-1">
                 {MODELS.map((id) => {
                   const modelId = id as modelID;
@@ -146,7 +145,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                       onMouseEnter={() => setHoveredModel(modelId)}
                       onMouseLeave={() => setHoveredModel(null)}
                       className={cn(
-                        "!px-3 py-2 cursor-pointer rounded-md text-xs transition-colors duration-150",
+                        "!px-2 sm:!px-3 py-1.5 sm:py-2 cursor-pointer rounded-md text-xs transition-colors duration-150",
                         "hover:bg-primary/5 hover:text-primary-foreground",
                         "focus:bg-primary/10 focus:text-primary focus:outline-none",
                         "data-[highlighted]:bg-primary/10 data-[highlighted]:text-primary",
@@ -154,11 +153,11 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                       )}
                     >
                       <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           {getProviderIcon(modelDetails[modelId].provider)}
                           <span className="font-medium truncate">{modelDetails[modelId].name}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground">
                           {modelDetails[modelId].provider}
                         </span>
                       </div>
@@ -168,8 +167,8 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
               </SelectGroup>
             </div>
             
-            {/* Model details column */}
-            <div className="p-4 flex flex-col">
+            {/* Model details column - hidden on smallest screens, visible on sm+ */}
+            <div className="p-2 sm:p-3 md:p-4 flex flex-col sm:block hidden">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   {getProviderIcon(currentModelDetails.provider)}
@@ -195,18 +194,39 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                   ))}
                 </div>
                 
-                <div className="text-xs text-foreground/90 leading-relaxed mb-3">
+                <div className="text-xs text-foreground/90 leading-relaxed mb-3 hidden md:block">
                   {currentModelDetails.description}
                 </div>
               </div>
               
-              <div className="bg-muted/40 rounded-md p-2">
+              <div className="bg-muted/40 rounded-md p-2 hidden md:block">
                 <div className="text-[10px] text-muted-foreground flex justify-between items-center">
                   <span>API Version:</span>
                   <code className="bg-background/80 px-2 py-0.5 rounded text-[10px] font-mono">
                     {currentModelDetails.apiVersion}
                   </code>
                 </div>
+              </div>
+            </div>
+            
+            {/* Condensed model details for mobile only */}
+            <div className="p-3 sm:hidden border-t border-border/30">
+              <div className="flex flex-wrap gap-1 mb-2">
+                {currentModelDetails.capabilities.slice(0, 4).map((capability) => (
+                  <span 
+                    key={capability}
+                    className={cn(
+                      "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+                      getCapabilityColor(capability)
+                    )}
+                  >
+                    {getCapabilityIcon(capability)}
+                    <span>{capability}</span>
+                  </span>
+                ))}
+                {currentModelDetails.capabilities.length > 4 && (
+                  <span className="text-[10px] text-muted-foreground">+{currentModelDetails.capabilities.length - 4} more</span>
+                )}
               </div>
             </div>
           </div>

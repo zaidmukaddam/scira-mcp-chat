@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy, Pencil } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { MCPServerManager, type MCPServer } from "./mcp-server-manager";
 import { ThemeToggle } from "./theme-toggle";
-import { getUserId } from "@/lib/user-id";
+import { getUserId, updateUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { useChats } from "@/lib/hooks/use-chats";
@@ -40,6 +40,16 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ChatSidebar() {
     const router = useRouter();
@@ -50,6 +60,8 @@ export function ChatSidebar() {
     const [mcpSettingsOpen, setMcpSettingsOpen] = useState(false);
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
+    const [editUserIdOpen, setEditUserIdOpen] = useState(false);
+    const [newUserId, setNewUserId] = useState('');
 
     // Initialize userId
     useEffect(() => {
@@ -79,6 +91,22 @@ export function ChatSidebar() {
 
     // Get active MCP servers status
     const activeServersCount = selectedMcpServers.length;
+
+    // Handle user ID update
+    const handleUpdateUserId = () => {
+        if (!newUserId.trim()) {
+            toast.error("User ID cannot be empty");
+            return;
+        }
+
+        updateUserId(newUserId.trim());
+        setUserId(newUserId.trim());
+        setEditUserIdOpen(false);
+        toast.success("User ID updated successfully");
+        
+        // Refresh the page to reload chats with new user ID
+        window.location.reload();
+    };
 
     // Show loading state if user ID is not yet initialized
     if (!userId) {
@@ -307,6 +335,13 @@ export function ChatSidebar() {
                                     <Copy className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
                                     Copy User ID
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
+                                    setEditUserIdOpen(true);
+                                }}>
+                                    <Pencil className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    Edit User ID
+                                </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
@@ -340,6 +375,44 @@ export function ChatSidebar() {
                     onOpenChange={setMcpSettingsOpen}
                 />
             </SidebarFooter>
+
+            <Dialog open={editUserIdOpen} onOpenChange={(open) => {
+                setEditUserIdOpen(open);
+                if (open) {
+                    setNewUserId(userId);
+                }
+            }}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Edit User ID</DialogTitle>
+                        <DialogDescription>
+                            Update your user ID for chat synchronization. This will affect which chats are visible to you.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="userId">User ID</Label>
+                            <Input
+                                id="userId"
+                                value={newUserId}
+                                onChange={(e) => setNewUserId(e.target.value)}
+                                placeholder="Enter your user ID"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setEditUserIdOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={handleUpdateUserId}>
+                            Save Changes
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Sidebar>
     );
 } 

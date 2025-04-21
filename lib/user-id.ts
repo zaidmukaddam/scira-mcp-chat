@@ -15,4 +15,9 @@ export function getUserId(): string {
   }
   
   return userId;
+}
+
+export function updateUserId(newUserId: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(USER_ID_KEY, newUserId);
 } 
