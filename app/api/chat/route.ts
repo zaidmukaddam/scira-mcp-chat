@@ -126,7 +126,7 @@ export async function POST(req: Request) {
             }
           });
           // wait for the subprocess to finish
-          await new Promise((resolve, reject) => {
+          await new Promise((resolve) => {
             subprocess.on('close', resolve);
             console.log("installed python package", packageName);
           });
