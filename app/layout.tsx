@@ -15,7 +15,20 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Scira MCP Chat",
     url: "https://mcp.scira.ai",
-  }
+    images: [
+      {
+        url: "https://mcp.scira.ai/opengraph-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scira MCP Chat",
+    description: "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
+    images: ["https://mcp.scira.ai/twitter-image.png"],
+  },
 };
 
 export default function RootLayout({

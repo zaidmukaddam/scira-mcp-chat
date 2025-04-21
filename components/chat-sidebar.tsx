@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy, Pencil } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy, Pencil, Github } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -353,6 +353,13 @@ export function ChatSidebar() {
                                 }}>
                                     <Settings className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
                                     MCP Settings
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
+                                    window.open("https://git.new/s-mcp", "_blank");
+                                }}>
+                                    <Github className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    GitHub
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                     <div className="flex items-center justify-between w-full">
