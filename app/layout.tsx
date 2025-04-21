@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Scira MCP Chat",
-  description: "Scira MCP Chat is a chat interface for interacting with MCP servers.",
+  description: "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
   openGraph: {
     siteName: "Scira MCP Chat",
     url: "https://mcp.scira.ai",
