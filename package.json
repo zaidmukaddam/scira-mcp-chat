@@ -1,10 +1,10 @@
 {
-  "name": "ai-sdk-starter",
+  "name": "mcp-chat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "drizzle-kit generate && next build --turbopack",
+    "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
