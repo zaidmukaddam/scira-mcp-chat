@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
   // Check if chat already exists for the given ID
   // If not, we'll create it in onFinish
-  var isNewChat = false;
+  let isNewChat = false;
   if (chatId) {
     try {
       const existingChat = await db.query.chats.findFirst({

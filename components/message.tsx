@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon } from "lucide-react";
 import { SpinnerIcon } from "./icons";
 import { ToolInvocation } from "./tool-invocation";
+import { CopyButton } from "./copy-button";
 
 interface ReasoningPart {
   type: "reasoning";
@@ -102,6 +103,18 @@ const PurePreviewMessage = ({
   status: "error" | "submitted" | "streaming" | "ready";
   isLatestMessage: boolean;
 }) => {
+  // Create a string with all text parts for copy functionality
+  const getMessageText = () => {
+    if (!message.parts) return "";
+    return message.parts
+      .filter(part => part.type === "text")
+      .map(part => (part.type === "text" ? part.text : ""))
+      .join("\n\n");
+  };
+
+  // Only show copy button if the message is from the assistant and not currently streaming
+  const shouldShowCopyButton = message.role === "assistant" && (!isLatestMessage || status !== "streaming");
+
   return (
     <AnimatePresence key={message.id}>
       <motion.div
@@ -174,6 +187,11 @@ const PurePreviewMessage = ({
                   return null;
               }
             })}
+            {shouldShowCopyButton && (
+              <div className="flex justify-start mt-2">
+                <CopyButton text={getMessageText()} />
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
