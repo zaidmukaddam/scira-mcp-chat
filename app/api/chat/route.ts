@@ -113,8 +113,17 @@ export async function POST(req: Request) {
           });
         }
 
+        // Check for uvx pattern and transform to python3 -m uv run
+        if (mcpServer.command === 'uvx') {
+          console.log("Detected uvx pattern, transforming to python3 -m uv run");
+          mcpServer.command = 'python3';
+          // Get the tool name (first argument)
+          const toolName = mcpServer.args[0];
+          // Replace args with the new pattern
+          mcpServer.args = ['-m', 'uv', 'run', toolName, ...mcpServer.args.slice(1)];
+        }
         // if python is passed in the command, install the python package mentioned in args after -m with subprocess or use regex to find the package name
-        if (mcpServer.command.includes('python3')) {
+        else if (mcpServer.command.includes('python3')) {
           const packageName = mcpServer.args[mcpServer.args.indexOf('-m') + 1];
           console.log("installing python package", packageName);
           const subprocess = spawn('pip3', ['install', packageName]);
@@ -195,6 +204,19 @@ export async function POST(req: Request) {
     messages,
     tools,
     maxSteps: 20,
+    providerOptions: {
+      google: {
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
+      },
+      anthropic: {
+        thinking: { 
+          type: 'enabled', 
+          budgetTokens: 12000 
+        },
+      } 
+    },
     onError: (error) => {
       console.error(JSON.stringify(error, null, 2));
     },

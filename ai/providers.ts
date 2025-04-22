@@ -1,9 +1,8 @@
-import { xai } from "@ai-sdk/xai";
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
 import { customProvider, wrapLanguageModel, extractReasoningMiddleware } from "ai";
-import { cohere } from "@ai-sdk/cohere";
+import { anthropic } from "@ai-sdk/anthropic";
 export interface ModelInfo {
   provider: string;
   name: string;
@@ -14,35 +13,41 @@ export interface ModelInfo {
 
 const middleware = extractReasoningMiddleware({
   tagName: 'think',
-  separator: '\n',
 });
 
 const languageModels = {
+  "gemini-2.5-flash": google("gemini-2.5-flash-preview-04-17"),
   "gpt-4.1-mini": openai("gpt-4.1-mini"),
-  "gemini-2-flash": google("gemini-2.0-flash-001"),
+  "claude-3-7-sonnet": anthropic('claude-3-7-sonnet-20250219'),
   "qwen-qwq": wrapLanguageModel(
     {
-      model: groq("qwen-qwq-32b"), 
+      model: groq("qwen-qwq-32b"),
       middleware
     }
   ),
-  "command-a": cohere('command-a-03-2025')
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
+  "gemini-2.5-flash": {
+    provider: "Google",
+    name: "Gemini 2.5 Flash",
+    description: "Latest version of Google's Gemini 2.5 Flash with strong reasoning and coding capabilities.",
+    apiVersion: "gemini-2.5-flash-preview-04-17",
+    capabilities: ["Balance", "Efficient", "Agentic"]
+  },
   "gpt-4.1-mini": {
     provider: "OpenAI",
     name: "GPT-4.1 Mini",
     description: "Compact version of OpenAI's GPT-4.1 with good balance of capabilities, including vision.",
     apiVersion: "gpt-4.1-mini",
-    capabilities: [ "Balance", "Creative", "Vision"]
+    capabilities: ["Balance", "Creative", "Vision"]
   },
-  "gemini-2-flash": {
-    provider: "Google",
-    name: "Gemini 2 Flash",
-    description: "Latest version of Google's Gemini 2 with strong reasoning and coding capabilities.",
-    apiVersion: "gemini-2-flash",
-    capabilities: ["Balance", "Efficient", "Agentic"]
+  "claude-3-7-sonnet": {
+    provider: "Anthropic",
+    name: "Claude 3.7 Sonnet",
+    description: "Latest version of Anthropic's Claude 3.7 Sonnet with strong reasoning and coding capabilities.",
+    apiVersion: "claude-3-7-sonnet-20250219",
+    capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
   "qwen-qwq": {
     provider: "Groq",
@@ -51,13 +56,6 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "qwen-qwq",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
-  "command-a": {
-    provider: "Cohere",
-    name: "Command A",
-    description: "Latest version of Cohere's Command A with strong reasoning and coding capabilities.",
-    apiVersion: "command-a-03-2025",
-    capabilities: ["Smart", "Fast", "Reasoning"]
-  }
 };
 
 export const model = customProvider({

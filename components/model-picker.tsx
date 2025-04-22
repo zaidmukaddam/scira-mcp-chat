@@ -34,7 +34,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
   // Function to get the appropriate icon for each provider
   const getProviderIcon = (provider: string) => {
     switch (provider.toLowerCase()) {
-      case 'xai':
+      case 'anthropic':
         return <Sparkles className="h-3 w-3 text-yellow-500" />;
       case 'openai':
         return <Zap className="h-3 w-3 text-green-500" />;
@@ -122,25 +122,25 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         defaultValue={validModelId}
       >
         <SelectTrigger 
-          className="max-w-[150px] sm:max-w-none sm:w-48 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-border/80 bg-background/80 backdrop-blur-sm hover:bg-muted/30 transition-all duration-200"
+          className="max-w-[200px] sm:max-w-fit sm:w-56 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-primary/20 bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 ring-offset-background focus:ring-2 focus:ring-primary/30 focus:ring-offset-2"
         >
           <SelectValue 
             placeholder="Select model" 
-            className="text-xs font-medium flex items-center gap-1 sm:gap-2"
+            className="text-xs font-medium flex items-center gap-1 sm:gap-2 text-primary dark:text-primary-foreground"
           >
             <div className="flex items-center gap-1 sm:gap-2">
               {getProviderIcon(modelDetails[validModelId].provider)}
-              <TextMorph>{modelDetails[validModelId].name}</TextMorph>
+              <span className="font-medium truncate">{modelDetails[validModelId].name}</span>
             </div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent
           align="start"
-          className="bg-background/95 dark:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0 w-[280px] sm:w-[350px] md:w-[485px]"
+          className="bg-background/95 dark:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0 w-[280px] sm:w-[350px] md:w-[515px]"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] md:grid-cols-[170px_1fr] items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] md:grid-cols-[200px_1fr] items-start">
             {/* Model selector column */}
-            <div className="sm:border-r border-border/40 bg-muted/20 p-2">
+            <div className="sm:border-r border-border/40 bg-muted/20 p-0 pr-1">
               <SelectGroup className="space-y-1">
                 {MODELS.map((id) => {
                   const modelId = id as modelID;

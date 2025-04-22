@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Loader2, Sparkles, ChevronsUpDown, UserIcon, Copy, Pencil, Github } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Sparkles, ChevronsUpDown, Copy, Pencil, Github } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -25,8 +25,6 @@ import Image from "next/image";
 import { MCPServerManager } from "./mcp-server-manager";
 import { ThemeToggle } from "./theme-toggle";
 import { getUserId, updateUserId } from "@/lib/user-id";
-import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-import { STORAGE_KEYS } from "@/lib/constants";
 import { useChats } from "@/lib/hooks/use-chats";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -51,6 +49,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMCP } from "@/lib/context/mcp-context";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatePresence, motion } from "motion/react";
 
 export function ChatSidebar() {
     const router = useRouter();
@@ -115,6 +115,23 @@ export function ChatSidebar() {
         return null; // Or a loading spinner
     }
 
+    // Create chat loading skeletons
+    const renderChatSkeletons = () => {
+        return Array(3).fill(0).map((_, index) => (
+            <SidebarMenuItem key={`skeleton-${index}`}>
+                <div className={`flex items-center gap-2 px-3 py-2 ${isCollapsed ? "justify-center" : ""}`}>
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                    {!isCollapsed && (
+                        <>
+                            <Skeleton className="h-4 w-full max-w-[180px]" />
+                            <Skeleton className="h-5 w-5 ml-auto rounded-md flex-shrink-0" />
+                        </>
+                    )}
+                </div>
+            </SidebarMenuItem>
+        ));
+    };
+
     return (
         <Sidebar className="shadow-sm bg-background/80 dark:bg-background/40 backdrop-blur-md" collapsible="icon">
             <SidebarHeader className="p-4 border-b border-border/40">
@@ -144,12 +161,7 @@ export function ChatSidebar() {
                     )}>
                         <SidebarMenu>
                             {isLoading ? (
-                                <div className={`flex items-center justify-center py-4 ${isCollapsed ? "" : "px-4"}`}>
-                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                    {!isCollapsed && (
-                                        <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
-                                    )}
-                                </div>
+                                renderChatSkeletons()
                             ) : chats.length === 0 ? (
                                 <div className={`flex items-center justify-center py-3 ${isCollapsed ? "" : "px-4"}`}>
                                     {isCollapsed ? (
@@ -164,50 +176,60 @@ export function ChatSidebar() {
                                     )}
                                 </div>
                             ) : (
-                                chats.map((chat) => (
-                                    <SidebarMenuItem key={chat.id}>
-                                        <SidebarMenuButton 
-                                            asChild
-                                            tooltip={isCollapsed ? chat.title : undefined}
-                                            data-active={pathname === `/chat/${chat.id}`}
-                                            className={cn(
-                                                "transition-all hover:bg-primary/10 active:bg-primary/15",
-                                                pathname === `/chat/${chat.id}` ? "bg-secondary/60 hover:bg-secondary/60" : ""
-                                            )}
+                                <AnimatePresence initial={false}>
+                                    {chats.map((chat) => (
+                                        <motion.div
+                                            key={chat.id}
+                                            initial={{ opacity: 0, height: 0, y: -10 }}
+                                            animate={{ opacity: 1, height: "auto", y: 0 }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.2 }}
                                         >
-                                            <Link
-                                                href={`/chat/${chat.id}`}
-                                                className="flex items-center justify-between w-full gap-1"
-                                            >
-                                                <div className="flex items-center min-w-0 overflow-hidden flex-1 pr-2">
-                                                    <MessageSquare className={cn(
-                                                        "h-4 w-4 flex-shrink-0",
-                                                        pathname === `/chat/${chat.id}` ? "text-foreground" : "text-muted-foreground"
-                                                    )} />
-                                                    {!isCollapsed && (
-                                                        <span className={cn(
-                                                            "ml-2 truncate text-sm",
-                                                            pathname === `/chat/${chat.id}` ? "text-foreground font-medium" : "text-foreground/80"
-                                                        )} title={chat.title}>
-                                                            {chat.title.length > 18 ? `${chat.title.slice(0, 18)}...` : chat.title}
-                                                        </span>
+                                            <SidebarMenuItem>
+                                                <SidebarMenuButton 
+                                                    asChild
+                                                    tooltip={isCollapsed ? chat.title : undefined}
+                                                    data-active={pathname === `/chat/${chat.id}`}
+                                                    className={cn(
+                                                        "transition-all hover:bg-primary/10 active:bg-primary/15",
+                                                        pathname === `/chat/${chat.id}` ? "bg-secondary/60 hover:bg-secondary/60" : ""
                                                     )}
-                                                </div>
-                                                {!isCollapsed && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6 text-muted-foreground hover:text-foreground flex-shrink-0"
-                                                        onClick={(e) => handleDeleteChat(chat.id, e)}
-                                                        title="Delete chat"
+                                                >
+                                                    <Link
+                                                        href={`/chat/${chat.id}`}
+                                                        className="flex items-center justify-between w-full gap-1"
                                                     >
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                    </Button>
-                                                )}
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))
+                                                        <div className="flex items-center min-w-0 overflow-hidden flex-1 pr-2">
+                                                            <MessageSquare className={cn(
+                                                                "h-4 w-4 flex-shrink-0",
+                                                                pathname === `/chat/${chat.id}` ? "text-foreground" : "text-muted-foreground"
+                                                            )} />
+                                                            {!isCollapsed && (
+                                                                <span className={cn(
+                                                                    "ml-2 truncate text-sm",
+                                                                    pathname === `/chat/${chat.id}` ? "text-foreground font-medium" : "text-foreground/80"
+                                                                )} title={chat.title}>
+                                                                    {chat.title.length > 18 ? `${chat.title.slice(0, 18)}...` : chat.title}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {!isCollapsed && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-6 w-6 text-muted-foreground hover:text-foreground flex-shrink-0"
+                                                                onClick={(e) => handleDeleteChat(chat.id, e)}
+                                                                title="Delete chat"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        )}
+                                                    </Link>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
                             )}
                         </SidebarMenu>
                     </SidebarGroupContent>
@@ -265,18 +287,23 @@ export function ChatSidebar() {
             
             <SidebarFooter className="p-4 border-t border-border/40 mt-auto">
                 <div className={`flex flex-col ${isCollapsed ? "items-center" : ""} gap-3`}>
-                    <Button
-                        variant="default"
-                        className={cn(
-                            "w-full bg-primary text-primary-foreground hover:bg-primary/90",
-                            isCollapsed ? "w-8 h-8 p-0" : ""
-                        )}
-                        onClick={handleNewChat}
-                        title={isCollapsed ? "New Chat" : undefined}
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                     >
-                        <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
-                        {!isCollapsed && <span>New Chat</span>}
-                    </Button>
+                        <Button
+                            variant="default"
+                            className={cn(
+                                "w-full bg-primary text-primary-foreground hover:bg-primary/90",
+                                isCollapsed ? "w-8 h-8 p-0" : ""
+                            )}
+                            onClick={handleNewChat}
+                            title={isCollapsed ? "New Chat" : undefined}
+                        >
+                            <PlusCircle className={`${isCollapsed ? "" : "mr-2"} h-4 w-4`} />
+                            {!isCollapsed && <span>New Chat</span>}
+                        </Button>
+                    </motion.div>
                     
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>

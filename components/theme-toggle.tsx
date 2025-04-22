@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils"
 
 export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof Button>) {
-  const { theme, setTheme } = useTheme()
+  const { setTheme } = useTheme()
 
   return (
     <DropdownMenu>
@@ -28,7 +28,7 @@ export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => setTheme("dark")}>
           <Flame className="mr-2 h-4 w-4" />
-          <span>Sunset</span>
+          <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setTheme("light")}>
           <Sun className="mr-2 h-4 w-4" />
@@ -36,7 +36,12 @@ export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setTheme("black")}>
           <CircleDashed className="mr-2 h-4 w-4" />
-          <span>Dark</span>
+          <span>Black</span>
+        </DropdownMenuItem>
+        {/* sunset theme */}
+        <DropdownMenuItem onSelect={() => setTheme("sunset")}>
+          <Sun className="mr-2 h-4 w-4" />
+          <span>Sunset</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
