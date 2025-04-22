@@ -42,7 +42,8 @@ interface MCPContextType {
 
 const MCPContext = createContext<MCPContextType | undefined>(undefined);
 
-export function MCPProvider({ children }: { children: React.ReactNode }) {
+export function MCPProvider(props: { children: React.ReactNode }) {
+  const { children } = props;
   const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
     STORAGE_KEYS.MCP_SERVERS, 
     []
