@@ -219,7 +219,7 @@ export async function POST(req: Request) {
     providerOptions: {
       google: {
         thinkingConfig: {
-          thinkingBudget: 0,
+          thinkingBudget: 2048,
         },
       },
       anthropic: {
