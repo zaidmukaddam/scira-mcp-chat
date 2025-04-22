@@ -13,13 +13,11 @@ export interface ModelInfo {
 }
 
 const middleware = extractReasoningMiddleware({
-  tagName: 'reasoning',
+  tagName: 'think',
   separator: '\n',
 });
 
 const languageModels = {
-  // "grok-3": xai("grok-3-latest"),
-  // "grok-3-mini": xai("grok-3-mini-fast-latest"),
   "gpt-4.1-mini": openai("gpt-4.1-mini"),
   "gemini-2-flash": google("gemini-2.0-flash-001"),
   "qwen-qwq": wrapLanguageModel(
@@ -32,20 +30,6 @@ const languageModels = {
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
-  // "grok-3": {
-  //   provider: "xAI",
-  //   name: "Grok-3",
-  //   description: "Latest version of xAI's flagship model with strong reasoning and coding capabilities.",
-  //   apiVersion: "grok-3-latest",
-  //   capabilities: ["Balance", "Efficient", "Agentic"]
-  // },
-  // "grok-3-mini": {
-  //   provider: "xAI",
-  //   name: "Grok-3 Mini",
-  //   description: "Fast, efficient and smaller xAI model with reasoning capabilities.",
-  //   apiVersion: "grok-3-mini-fast-latest",
-  //   capabilities: ["Fast","Reasoning", "Efficient"]
-  // },
   "gpt-4.1-mini": {
     provider: "OpenAI",
     name: "GPT-4.1 Mini",
