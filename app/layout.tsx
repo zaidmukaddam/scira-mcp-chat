@@ -10,6 +10,7 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mcp.scira.ai"),
   title: "Scira MCP Chat",
   description: "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
   openGraph: {
