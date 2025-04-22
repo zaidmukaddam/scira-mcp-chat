@@ -197,8 +197,12 @@ export async function POST(req: Request) {
     model: model.languageModel(selectedModel),
     system: `You are a helpful assistant with access to a variety of tools.
 
+    Today's date is ${new Date().toISOString().split('T')[0]}.
+
     The tools are very powerful, and you can use them to answer the user's question.
     So choose the tool that is most relevant to the user's question.
+
+    If tools are not available, say you don't know or if the user wants a tool they can add one from the server icon in bottom left corner in the sidebar.
 
     You can use multiple tools in a single response.
     Always respond after using the tools for better user experience.
