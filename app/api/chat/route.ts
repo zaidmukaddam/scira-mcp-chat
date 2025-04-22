@@ -1,12 +1,10 @@
 import { model, type modelID } from "@/ai/providers";
-import { composioTools } from "@/ai/tools";
 import { streamText, type UIMessage } from "ai";
-import { openai } from '@ai-sdk/openai';
 import { appendResponseMessages } from 'ai';
 import { saveChat, saveMessages, convertToDBMessages } from '@/lib/chat-store';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
-import { messages, chats } from '@/lib/db/schema';
+import { chats } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 import { experimental_createMCPClient as createMCPClient, MCPTransport } from 'ai';
@@ -14,7 +12,7 @@ import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdi
 import { spawn } from "child_process";
 
 // Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+export const maxDuration = 120;
 
 interface KeyValuePair {
   key: string;
@@ -79,13 +77,13 @@ export async function POST(req: Request) {
   // Initialize tools
   let tools = {};
   const mcpClients: any[] = [];
-  
+
   // Process each MCP server configuration
   for (const mcpServer of mcpServers) {
     try {
       // Create appropriate transport based on type
       let transport: MCPTransport | { type: 'sse', url: string, headers?: Record<string, string> };
-      
+
       if (mcpServer.type === 'sse') {
         // Convert headers array to object for SSE transport
         const headers: Record<string, string> = {};
@@ -94,9 +92,9 @@ export async function POST(req: Request) {
             if (header.key) headers[header.key] = header.value || '';
           });
         }
-        
-        transport = { 
-          type: 'sse' as const, 
+
+        transport = {
+          type: 'sse' as const,
           url: mcpServer.url,
           headers: Object.keys(headers).length > 0 ? headers : undefined
         };
@@ -106,7 +104,7 @@ export async function POST(req: Request) {
           console.warn("Skipping stdio MCP server due to missing command or args");
           continue;
         }
-        
+
         // Convert env array to object for stdio transport
         const env: Record<string, string> = {};
         if (mcpServer.env && mcpServer.env.length > 0) {
@@ -131,7 +129,7 @@ export async function POST(req: Request) {
             console.log("installed python package", packageName);
           });
         }
-        
+
         transport = new StdioMCPTransport({
           command: mcpServer.command,
           args: mcpServer.args,
@@ -141,14 +139,14 @@ export async function POST(req: Request) {
         console.warn(`Skipping MCP server with unsupported transport type: ${mcpServer.type}`);
         continue;
       }
-      
+
       const mcpClient = await createMCPClient({ transport });
       mcpClients.push(mcpClient);
-      
+
       const mcptools = await mcpClient.tools();
-      
+
       console.log(`MCP tools from ${mcpServer.type} transport:`, Object.keys(mcptools));
-      
+
       // Add MCP tools to tools object
       tools = { ...tools, ...mcptools };
     } catch (error) {
@@ -205,13 +203,13 @@ export async function POST(req: Request) {
         messages,
         responseMessages: response.messages,
       });
-      
+
       await saveChat({
         id,
         userId,
         messages: allMessages,
       });
-      
+
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
       // close all mcp clients

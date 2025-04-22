@@ -42,6 +42,8 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         return <Zap className="h-3 w-3 text-red-500" />;
       case 'groq':
         return <Sparkles className="h-3 w-3 text-blue-500" />;
+      case 'cohere':
+        return <Sparkles className="h-3 w-3 text-yellow-500" />;
       default:
         return <Info className="h-3 w-3 text-blue-500" />;
     }

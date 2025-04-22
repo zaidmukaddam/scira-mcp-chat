@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
 import { customProvider, wrapLanguageModel, extractReasoningMiddleware } from "ai";
-
+import { cohere } from "@ai-sdk/cohere";
 export interface ModelInfo {
   provider: string;
   name: string;
@@ -21,14 +21,14 @@ const languageModels = {
   // "grok-3": xai("grok-3-latest"),
   // "grok-3-mini": xai("grok-3-mini-fast-latest"),
   "gpt-4.1-mini": openai("gpt-4.1-mini"),
-  "gpt-4.1-nano": openai("gpt-4.1-nano"),
   "gemini-2-flash": google("gemini-2.0-flash-001"),
   "qwen-qwq": wrapLanguageModel(
     {
       model: groq("qwen-qwq-32b"), 
       middleware
     }
-  )
+  ),
+  "command-a": cohere('command-a-03-2025')
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
@@ -53,13 +53,6 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "gpt-4.1-mini",
     capabilities: [ "Balance", "Creative", "Vision"]
   },
-  "gpt-4.1-nano": {
-    provider: "OpenAI",
-    name: "GPT-4.1 Nano",
-    description: "Smallest and fastest GPT-4.1 variant designed for efficient rapid responses.",
-    apiVersion: "gpt-4.1-nano",
-    capabilities: ["Rapid", "Compact", "Efficient", "Vision"]
-  },  
   "gemini-2-flash": {
     provider: "Google",
     name: "Gemini 2 Flash",
@@ -73,6 +66,13 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     description: "Latest version of Alibaba's Qwen QWQ with strong reasoning and coding capabilities.",
     apiVersion: "qwen-qwq",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
+  },
+  "command-a": {
+    provider: "Cohere",
+    name: "Command A",
+    description: "Latest version of Cohere's Command A with strong reasoning and coding capabilities.",
+    apiVersion: "command-a-03-2025",
+    capabilities: ["Smart", "Fast", "Reasoning"]
   }
 };
 
