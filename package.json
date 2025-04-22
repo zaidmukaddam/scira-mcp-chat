@@ -73,6 +73,7 @@
     "@types/react-dom": "^19.1.2",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.0",
+    "esbuild": ">=0.25.0",
     "eslint": "^9.24.0",
     "eslint-config-next": "15.3.0",
     "pg-pool": "^3.8.0",
