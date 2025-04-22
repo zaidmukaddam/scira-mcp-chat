@@ -115,6 +115,18 @@ export async function POST(req: Request) {
 
         // Check for uvx pattern and transform to python3 -m uv run
         if (mcpServer.command === 'uvx') {
+          // install uv
+          const subprocess = spawn('pip3', ['install', 'uv']);
+          subprocess.on('close', (code: number) => {
+            if (code !== 0) {
+              console.error(`Failed to install uv: ${code}`);
+            }
+          });
+          // wait for the subprocess to finish
+          await new Promise((resolve) => {
+            subprocess.on('close', resolve);
+            console.log("installed uv");
+          });
           console.log("Detected uvx pattern, transforming to python3 -m uv run");
           mcpServer.command = 'python3';
           // Get the tool name (first argument)
