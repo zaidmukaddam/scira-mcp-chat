@@ -138,7 +138,10 @@ export function ChatSidebar() {
                     )}>
                         Chats
                     </SidebarGroupLabel>
-                    <SidebarGroupContent className="overflow-y-auto pt-1">
+                    <SidebarGroupContent className={cn(
+                        "overflow-y-auto pt-1",
+                        isCollapsed ? "overflow-x-hidden" : ""
+                    )}>
                         <SidebarMenu>
                             {isLoading ? (
                                 <div className={`flex items-center justify-center py-4 ${isCollapsed ? "" : "px-4"}`}>
