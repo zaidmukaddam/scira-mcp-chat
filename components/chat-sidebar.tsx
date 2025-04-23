@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Sparkles, ChevronsUpDown, Copy, Pencil, Github } from "lucide-react";
+import { MessageSquare, PlusCircle, Trash2, ServerIcon, Settings, Sparkles, ChevronsUpDown, Copy, Pencil, Github, Key } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Image from "next/image";
 import { MCPServerManager } from "./mcp-server-manager";
+import { ApiKeyManager } from "./api-key-manager";
 import { ThemeToggle } from "./theme-toggle";
 import { getUserId, updateUserId } from "@/lib/user-id";
 import { useChats } from "@/lib/hooks/use-chats";
@@ -57,6 +58,7 @@ export function ChatSidebar() {
     const pathname = usePathname();
     const [userId, setUserId] = useState<string>('');
     const [mcpSettingsOpen, setMcpSettingsOpen] = useState(false);
+    const [apiKeySettingsOpen, setApiKeySettingsOpen] = useState(false);
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
     const [editUserIdOpen, setEditUserIdOpen] = useState(false);
@@ -386,6 +388,13 @@ export function ChatSidebar() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onSelect={(e) => {
                                     e.preventDefault();
+                                    setApiKeySettingsOpen(true);
+                                }}>
+                                    <Key className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
+                                    API Keys
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault();
                                     window.open("https://git.new/s-mcp", "_blank");
                                 }}>
                                     <Github className="mr-2 h-4 w-4 hover:text-sidebar-accent" />
@@ -412,6 +421,11 @@ export function ChatSidebar() {
                     onSelectedServersChange={setSelectedMcpServers}
                     open={mcpSettingsOpen}
                     onOpenChange={setMcpSettingsOpen}
+                />
+                
+                <ApiKeyManager
+                    open={apiKeySettingsOpen}
+                    onOpenChange={setApiKeySettingsOpen}
                 />
             </SidebarFooter>
 

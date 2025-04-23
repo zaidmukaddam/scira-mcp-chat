@@ -35,14 +35,14 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
   const getProviderIcon = (provider: string) => {
     switch (provider.toLowerCase()) {
       case 'anthropic':
-        return <Sparkles className="h-3 w-3 text-yellow-500" />;
+        return <Sparkles className="h-3 w-3 text-orange-600" />;
       case 'openai':
         return <Zap className="h-3 w-3 text-green-500" />;
       case 'google':
         return <Zap className="h-3 w-3 text-red-500" />;
       case 'groq':
         return <Sparkles className="h-3 w-3 text-blue-500" />;
-      case 'cohere':
+      case 'xai':
         return <Sparkles className="h-3 w-3 text-yellow-500" />;
       default:
         return <Info className="h-3 w-3 text-blue-500" />;

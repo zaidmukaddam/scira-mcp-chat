@@ -1,8 +1,14 @@
-import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
-import { groq } from "@ai-sdk/groq";
-import { customProvider, wrapLanguageModel, extractReasoningMiddleware } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGroq } from "@ai-sdk/groq";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createXai } from "@ai-sdk/xai";
+
+import { 
+  customProvider, 
+  wrapLanguageModel, 
+  extractReasoningMiddleware 
+} from "ai";
+
 export interface ModelInfo {
   provider: string;
   name: string;
@@ -15,26 +21,51 @@ const middleware = extractReasoningMiddleware({
   tagName: 'think',
 });
 
+// Helper to get API keys from environment variables first, then localStorage
+const getApiKey = (key: string): string | undefined => {
+  // Check for environment variables first
+  if (process.env[key]) {
+    return process.env[key] || undefined;
+  }
+  
+  // Fall back to localStorage if available
+  if (typeof window !== 'undefined') {
+    return window.localStorage.getItem(key) || undefined;
+  }
+  
+  return undefined;
+};
+
+// Create provider instances with API keys from localStorage
+const openaiClient = createOpenAI({
+  apiKey: getApiKey('OPENAI_API_KEY'),
+});
+
+const anthropicClient = createAnthropic({
+  apiKey: getApiKey('ANTHROPIC_API_KEY'),
+});
+
+const groqClient = createGroq({
+  apiKey: getApiKey('GROQ_API_KEY'),
+});
+
+const xaiClient = createXai({
+  apiKey: getApiKey('XAI_API_KEY'),
+});
+
 const languageModels = {
-  "gemini-2.5-flash": google("gemini-2.5-flash-preview-04-17"),
-  "gpt-4.1-mini": openai("gpt-4.1-mini"),
-  "claude-3-7-sonnet": anthropic('claude-3-7-sonnet-20250219'),
+  "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
+  "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
   "qwen-qwq": wrapLanguageModel(
     {
-      model: groq("qwen-qwq-32b"),
+      model: groqClient("qwen-qwq-32b"),
       middleware
     }
   ),
+  "grok-3-mini": xaiClient("grok-3-mini-latest"),
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
-  "gemini-2.5-flash": {
-    provider: "Google",
-    name: "Gemini 2.5 Flash",
-    description: "Latest version of Google's Gemini 2.5 Flash with strong reasoning and coding capabilities.",
-    apiVersion: "gemini-2.5-flash-preview-04-17",
-    capabilities: ["Balance", "Efficient", "Agentic"]
-  },
   "gpt-4.1-mini": {
     provider: "OpenAI",
     name: "GPT-4.1 Mini",
@@ -56,7 +87,24 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "qwen-qwq",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
+  "grok-3-mini": {
+    provider: "XAI",
+    name: "Grok 3 Mini",
+    description: "Latest version of XAI's Grok 3 Mini with strong reasoning and coding capabilities.",
+    apiVersion: "grok-3-mini-latest",
+    capabilities: ["Reasoning", "Efficient", "Agentic"]
+  },
 };
+
+// Update API keys when localStorage changes (for runtime updates)
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    // Reload the page if any API key changed to refresh the providers
+    if (event.key?.includes('API_KEY')) {
+      window.location.reload();
+    }
+  });
+}
 
 export const model = customProvider({
   languageModels,
