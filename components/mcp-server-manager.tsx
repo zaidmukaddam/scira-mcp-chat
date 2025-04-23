@@ -28,13 +28,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "./ui/select";
-import {
     Accordion,
     AccordionContent,
     AccordionItem,
