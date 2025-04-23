@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Sparkles, Zap, Info, Bolt, Code, Brain, Lightbulb, Image, Gauge, Rocket, Bot } from "lucide-react";
 import { useState, useEffect } from "react";
-import { TextMorph } from "./ui/text-morph";
 
 interface ModelPickerProps {
   selectedModel: modelID;
