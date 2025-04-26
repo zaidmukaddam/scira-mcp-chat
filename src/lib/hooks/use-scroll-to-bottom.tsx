@@ -7,6 +7,8 @@ export function useScrollToBottom(): [
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const isUserScrollingRef = useRef(false);
+  const pendingScrollRef = useRef(false);
+  const lastHeightRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -14,10 +16,12 @@ export function useScrollToBottom(): [
 
     if (!container || !end) return;
 
-    // Initial scroll to bottom
-    setTimeout(() => {
+    // Initial scroll to bottom - use requestAnimationFrame for smoother initial load
+    requestAnimationFrame(() => {
       end.scrollIntoView({ behavior: 'instant', block: 'end' });
-    }, 100);
+      // Store the initial height after scroll
+      lastHeightRef.current = container.scrollHeight;
+    });
 
     // Track if user has manually scrolled up
     const handleScroll = () => {
@@ -32,7 +36,7 @@ export function useScrollToBottom(): [
 
     // Handle mutations
     const observer = new MutationObserver((mutations) => {
-      if (!container || !end) return;
+      if (!container || !end || pendingScrollRef.current) return;
 
       // Check if mutation is related to expand/collapse
       const isToggleSection = mutations.some(mutation => {
@@ -55,14 +59,32 @@ export function useScrollToBottom(): [
 
       // Only auto-scroll if user hasn't manually scrolled up
       if (!isUserScrollingRef.current) {
-        // For new messages, use smooth scrolling
-        end.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        pendingScrollRef.current = true;
+        
+        // Check if this is a significant content change
+        const heightDifference = Math.abs(container.scrollHeight - lastHeightRef.current);
+        
+        // Use instant behavior for small changes (typing) and smooth for large changes (new messages)
+        const behavior = heightDifference > 50 ? 'smooth' : 'instant';
+        
+        // Use requestAnimationFrame to batch scrolling and prevent jank
+        requestAnimationFrame(() => {
+          end.scrollIntoView({ behavior, block: 'end' });
+          // Update last height after scroll
+          lastHeightRef.current = container.scrollHeight;
+          
+          // Clear pending flag after a short delay to prevent rapid scrolling
+          setTimeout(() => {
+            pendingScrollRef.current = false;
+          }, 100);
+        });
       }
     });
 
     observer.observe(container, {
       childList: true,
       subtree: true,
+      characterData: true,
     });
 
     // Add scroll event listener

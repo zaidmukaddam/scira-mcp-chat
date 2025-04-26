@@ -29,7 +29,7 @@ export function useChats(userId: string) {
       return response.json();
     },
     enabled: !!userId, // Only run query if userId exists
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    staleTime: 1000 * 30, // Consider data fresh for 30 seconds (reduced from 5 minutes)
     refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 

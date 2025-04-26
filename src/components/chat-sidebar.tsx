@@ -75,6 +75,14 @@ export function ChatSidebar() {
     // Use TanStack Query to fetch chats
     const { chats, isLoading, deleteChat, refreshChats } = useChats(userId);
 
+    // Initialize and refresh chats when user ID changes
+    useEffect(() => {
+        if (userId) {
+            // Immediately refresh the chats list when sidebar mounts or user ID changes
+            refreshChats();
+        }
+    }, [userId, refreshChats]);
+
     // Start a new chat
     const handleNewChat = () => {
         router.push('/');

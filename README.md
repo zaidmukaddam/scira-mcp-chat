@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="#features"><strong>Features</strong></a> •
+  <a href="#development"><strong>Development</strong></a> •
   <a href="#mcp-server-configuration"><strong>MCP Configuration</strong></a> •
   <a href="#license"><strong>License</strong></a>
 </p>
@@ -22,6 +23,118 @@
 - Reasoning model support.
 - [shadcn/ui](https://ui.shadcn.com/) components for a modern, responsive UI powered by [Tailwind CSS](https://tailwindcss.com).
 - Built with the latest [Next.js](https://nextjs.org) App Router.
+
+## Development
+
+### Prerequisites
+- Node.js (version 18 or higher)
+- pnpm
+
+### Setup
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/scira-mcp-chat-desktop.git
+   cd scira-mcp-chat-desktop
+   ```
+
+2. Install dependencies
+   ```bash
+   pnpm install
+   ```
+
+3. Create a `.env` file in the root directory with your AI provider API keys
+   ```
+   # OpenAI
+   OPENAI_API_KEY=your_openai_api_key
+
+   # Anthropic
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+
+   # Google
+   GOOGLE_API_KEY=your_google_api_key
+
+   # Cohere
+   COHERE_API_KEY=your_cohere_api_key
+
+   # Groq
+   GROQ_API_KEY=your_groq_api_key
+
+   # XAI
+   XAI_API_KEY=your_xai_api_key
+   
+   # Database
+   DATABASE_URL=postgresql://username:password@localhost:5432/mydatabase
+   ```
+
+### Database Setup
+
+The application uses PostgreSQL with Drizzle ORM for data persistence. To set up the database:
+
+1. Install PostgreSQL on your system or use a cloud service like [Neon](https://neon.tech)
+
+2. Create a database and update your `.env` file with the database connection URL:
+   ```
+   DATABASE_URL=postgresql://username:password@localhost:5432/mydatabase
+   ```
+
+3. Generate and push the database schema:
+   ```bash
+   # Generate migration files
+   pnpm db:generate
+   
+   # Push schema to database
+   pnpm db:push
+   ```
+
+4. You can explore your database using Drizzle Studio:
+   ```bash
+   pnpm db:studio
+   ```
+
+5. Start the development server
+   ```bash
+   pnpm dev
+   ```
+
+### Adding AI SDK Providers
+
+This application uses the [AI SDK by Vercel](https://sdk.vercel.ai/docs) which supports multiple AI providers. You can configure additional providers by:
+
+1. Adding the appropriate API key to your `.env` file
+2. Configuring the provider in your code
+
+The project already has the following AI SDK provider packages installed:
+- `@ai-sdk/openai`
+- `@ai-sdk/anthropic`
+- `@ai-sdk/google`
+- `@ai-sdk/cohere`
+- `@ai-sdk/groq`
+- `@ai-sdk/xai`
+
+To obtain API keys:
+- [OpenAI](https://platform.openai.com/api-keys)
+- [Anthropic](https://console.anthropic.com/settings/keys)
+- [Google AI](https://ai.google.dev/)
+- [Cohere](https://dashboard.cohere.com/api-keys)
+- [Groq](https://console.groq.com/keys)
+- [XAI](https://developer.xai.org/)
+
+### Running and Building
+
+#### Development
+```bash
+# Start the development server
+pnpm dev
+```
+
+#### Distribution
+```bash
+# Build the application
+pnpm build
+
+# Create distributable (macOS)
+pnpm dist
+```
 
 ## MCP Server Configuration
 

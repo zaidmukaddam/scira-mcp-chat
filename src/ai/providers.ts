@@ -62,7 +62,7 @@ const languageModels = {
       middleware
     }
   ),
-  "grok-3-mini": xaiClient("grok-3-mini-latest"),
+  "grok-3-mini": xaiClient("grok-3-mini-fast-latest"),
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {

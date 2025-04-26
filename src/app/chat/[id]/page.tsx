@@ -33,7 +33,16 @@ export default function ChatPage() {
             });
             
             if (!response.ok) {
-              throw new Error('Failed to load chat');
+              // If chat doesn't exist yet (404), return null instead of throwing
+              // This is expected for new chats that haven't been saved yet
+              if (response.status === 404) {
+                console.log('Chat not found yet, may be a new chat');
+                return null;
+              }
+              
+              // For other errors, log but don't throw to prevent React Query from retrying
+              console.error(`Failed to load chat: ${response.status}`);
+              return null;
             }
             
             return response.json();

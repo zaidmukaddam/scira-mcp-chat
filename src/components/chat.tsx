@@ -110,6 +110,14 @@ export default function Chat() {
         userId,
       },
       experimental_throttle: 500,
+      onResponse(response) {
+        // Check for chat ID in response headers and refresh chats list if found
+        const responseChatId = response.headers.get('X-Chat-ID');
+        if (responseChatId && userId) {
+          // Immediately invalidate chats query to show the new chat in sidebar
+          queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+        }
+      },
       onFinish: () => {
         // Invalidate the chats query to refresh the sidebar
         if (userId) {
@@ -134,6 +142,12 @@ export default function Chat() {
       // If this is a new conversation, redirect to the chat page with the generated ID
       const effectiveChatId = generatedChatId;
       
+      // Immediately invalidate the chats query cache to refresh sidebar
+      // This ensures the sidebar shows the new chat immediately
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+      }
+      
       // Submit the form
       handleSubmit(e);
       
@@ -143,7 +157,7 @@ export default function Chat() {
       // Normal submission for existing chats
       handleSubmit(e);
     }
-  }, [chatId, generatedChatId, input, handleSubmit, router]);
+  }, [chatId, generatedChatId, input, handleSubmit, router, userId, queryClient]);
 
   const isLoading = status === "streaming" || status === "submitted" || isLoadingChat;
 
