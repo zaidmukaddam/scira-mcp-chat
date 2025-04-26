@@ -117,7 +117,7 @@ To obtain API keys:
 - [Google AI](https://ai.google.dev/)
 - [Cohere](https://dashboard.cohere.com/api-keys)
 - [Groq](https://console.groq.com/keys)
-- [XAI](https://developer.xai.org/)
+- [XAI](https://console.x.ai/)
 
 ### Running and Building
 

@@ -57,7 +57,6 @@ export default function RootLayout({
             </main>
           </div>
         </Providers>
-        <Script defer src="https://cloud.umami.is/script.js" data-website-id="1373896a-fb20-4c9d-b718-c723a2471ae5" />
       </body>
     </html>
   );
