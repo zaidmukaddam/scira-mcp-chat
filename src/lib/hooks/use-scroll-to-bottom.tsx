@@ -26,10 +26,10 @@ export function useScrollToBottom(): [
     // Track if user has manually scrolled up
     const handleScroll = () => {
       if (!container) return;
-      
+
       const { scrollTop, scrollHeight, clientHeight } = container;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      
+
       // If user is scrolled up, mark as manually scrolling
       isUserScrollingRef.current = distanceFromBottom > 100;
     };
@@ -39,11 +39,11 @@ export function useScrollToBottom(): [
       if (!container || !end || pendingScrollRef.current) return;
 
       // Check if mutation is related to expand/collapse
-      const isToggleSection = mutations.some(mutation => {
+      const isToggleSection = mutations.some((mutation) => {
         // Check if the target or parent is a motion-div (expanded content)
         let target = mutation.target as HTMLElement;
         let isExpand = false;
-        
+
         while (target && target !== container) {
           if (target.classList?.contains('motion-div')) {
             isExpand = true;
@@ -60,19 +60,21 @@ export function useScrollToBottom(): [
       // Only auto-scroll if user hasn't manually scrolled up
       if (!isUserScrollingRef.current) {
         pendingScrollRef.current = true;
-        
+
         // Check if this is a significant content change
-        const heightDifference = Math.abs(container.scrollHeight - lastHeightRef.current);
-        
+        const heightDifference = Math.abs(
+          container.scrollHeight - lastHeightRef.current,
+        );
+
         // Use instant behavior for small changes (typing) and smooth for large changes (new messages)
         const behavior = heightDifference > 50 ? 'smooth' : 'instant';
-        
+
         // Use requestAnimationFrame to batch scrolling and prevent jank
         requestAnimationFrame(() => {
           end.scrollIntoView({ behavior, block: 'end' });
           // Update last height after scroll
           lastHeightRef.current = container.scrollHeight;
-          
+
           // Clear pending flag after a short delay to prevent rapid scrolling
           setTimeout(() => {
             pendingScrollRef.current = false;
@@ -96,5 +98,8 @@ export function useScrollToBottom(): [
     };
   }, []);
 
-  return [containerRef, endRef] as [RefObject<HTMLDivElement>, RefObject<HTMLDivElement>];
+  return [containerRef, endRef] as [
+    RefObject<HTMLDivElement>,
+    RefObject<HTMLDivElement>,
+  ];
 }

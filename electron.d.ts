@@ -3,10 +3,16 @@ declare global {
     electron: {
       ipcRenderer: {
         send: (channel: string, data: unknown) => void;
-        on: (channel: string, listener: (event: unknown, ...args: unknown[]) => void) => void;
+        on: (
+          channel: string,
+          listener: (event: unknown, ...args: unknown[]) => void,
+        ) => void;
       };
       python: {
-        execute: (scriptPath: string, args: string[]) => Promise<{
+        execute: (
+          scriptPath: string,
+          args: string[],
+        ) => Promise<{
           stdout?: string;
           stderr?: string;
           code?: number;
@@ -14,7 +20,10 @@ declare global {
         }>;
       };
       node: {
-        execute: (scriptPath: string, args: string[]) => Promise<{
+        execute: (
+          scriptPath: string,
+          args: string[],
+        ) => Promise<{
           stdout?: string;
           stderr?: string;
           code?: number;
@@ -28,4 +37,4 @@ declare global {
   }
 }
 
-export {}; 
+export {};

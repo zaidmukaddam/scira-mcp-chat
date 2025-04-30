@@ -1,5 +1,5 @@
-import { ArrowUp } from "lucide-react";
-import { Input as ShadcnInput } from "./ui/input";
+import { ArrowUp } from 'lucide-react';
+import { Input as ShadcnInput } from './ui/input';
 
 interface InputProps {
   input: string;
@@ -22,10 +22,10 @@ export const Input = ({
         className="bg-secondary py-6 w-full rounded-xl pr-12"
         value={input}
         autoFocus
-        placeholder={"Say something..."}
+        placeholder={'Say something...'}
         onChange={handleInputChange}
       />
-      {status === "streaming" || status === "submitted" ? (
+      {status === 'streaming' || status === 'submitted' ? (
         <button
           type="button"
           onClick={stop}

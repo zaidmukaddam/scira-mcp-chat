@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import Chat from "@/components/chat";
-import { getUserId } from "@/lib/user-id";
-import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import Chat from '@/components/chat';
+import { getUserId } from '@/lib/user-id';
+import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function ChatPage() {
   const params = useParams();
@@ -16,7 +16,7 @@ export default function ChatPage() {
   useEffect(() => {
     async function prefetchChat() {
       if (!chatId || !userId) return;
-      
+
       // Check if data already exists in cache
       const existingData = queryClient.getQueryData(['chat', chatId, userId]);
       if (existingData) return;
@@ -28,10 +28,10 @@ export default function ChatPage() {
           try {
             const response = await fetch(`/api/chats/${chatId}`, {
               headers: {
-                'x-user-id': userId
-              }
+                'x-user-id': userId,
+              },
             });
-            
+
             if (!response.ok) {
               // If chat doesn't exist yet (404), return null instead of throwing
               // This is expected for new chats that haven't been saved yet
@@ -39,12 +39,12 @@ export default function ChatPage() {
                 console.log('Chat not found yet, may be a new chat');
                 return null;
               }
-              
+
               // For other errors, log but don't throw to prevent React Query from retrying
               console.error(`Failed to load chat: ${response.status}`);
               return null;
             }
-            
+
             return response.json();
           } catch (error) {
             console.error('Error prefetching chat:', error);
@@ -59,4 +59,4 @@ export default function ChatPage() {
   }, [chatId, userId, queryClient]);
 
   return <Chat />;
-} 
+}

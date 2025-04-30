@@ -1,4 +1,7 @@
-import { MCPTransport, experimental_createMCPClient as createMCPClient } from 'ai';
+import {
+  MCPTransport,
+  experimental_createMCPClient as createMCPClient,
+} from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
 import { spawn } from 'child_process';
 
@@ -24,7 +27,7 @@ export interface MCPClientManager {
 
 export async function initializeMCPClients(
   mcpServers: MCPServerConfig[] = [],
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ): Promise<MCPClientManager> {
   // Initialize tools
   let tools = {};
@@ -34,14 +37,18 @@ export async function initializeMCPClients(
   for (const mcpServer of mcpServers) {
     try {
       // Create appropriate transport based on type
-      let transport: MCPTransport | { type: 'sse', url: string, headers?: Record<string, string> };
+      let transport:
+        | MCPTransport
+        | { type: 'sse'; url: string; headers?: Record<string, string> };
 
       if (mcpServer.type === 'sse') {
         transport = await createSSETransport(mcpServer);
       } else if (mcpServer.type === 'stdio') {
         transport = await createStdioTransport(mcpServer);
       } else {
-        console.warn(`Skipping MCP server with unsupported transport type: ${mcpServer.type}`);
+        console.warn(
+          `Skipping MCP server with unsupported transport type: ${mcpServer.type}`,
+        );
         continue;
       }
 
@@ -50,12 +57,15 @@ export async function initializeMCPClients(
 
       const mcptools = await mcpClient.tools();
 
-      console.log(`MCP tools from ${mcpServer.type} transport:`, Object.keys(mcptools));
+      console.log(
+        `MCP tools from ${mcpServer.type} transport:`,
+        Object.keys(mcptools),
+      );
 
       // Add MCP tools to tools object
       tools = { ...tools, ...mcptools };
     } catch (error) {
-      console.error("Failed to initialize MCP client:", error);
+      console.error('Failed to initialize MCP client:', error);
       // Continue with other servers instead of failing the entire request
     }
   }
@@ -70,7 +80,7 @@ export async function initializeMCPClients(
   return {
     tools,
     clients: mcpClients,
-    cleanup: async () => await cleanupMCPClients(mcpClients)
+    cleanup: async () => await cleanupMCPClients(mcpClients),
   };
 }
 
@@ -78,7 +88,7 @@ async function createSSETransport(mcpServer: MCPServerConfig) {
   // Convert headers array to object for SSE transport
   const headers: Record<string, string> = {};
   if (mcpServer.headers && mcpServer.headers.length > 0) {
-    mcpServer.headers.forEach(header => {
+    mcpServer.headers.forEach((header) => {
       if (header.key) headers[header.key] = header.value || '';
     });
   }
@@ -86,20 +96,20 @@ async function createSSETransport(mcpServer: MCPServerConfig) {
   return {
     type: 'sse' as const,
     url: mcpServer.url,
-    headers: Object.keys(headers).length > 0 ? headers : undefined
+    headers: Object.keys(headers).length > 0 ? headers : undefined,
   };
 }
 
 async function createStdioTransport(mcpServer: MCPServerConfig) {
   // For stdio transport, we need command and args
   if (!mcpServer.command || !mcpServer.args || mcpServer.args.length === 0) {
-    throw new Error("Skipping stdio MCP server due to missing command or args");
+    throw new Error('Skipping stdio MCP server due to missing command or args');
   }
 
   // Convert env array to object for stdio transport
   const env: Record<string, string> = {};
   if (mcpServer.env && mcpServer.env.length > 0) {
-    mcpServer.env.forEach(envVar => {
+    mcpServer.env.forEach((envVar) => {
       if (envVar.key) env[envVar.key] = envVar.value || '';
     });
   }
@@ -107,7 +117,7 @@ async function createStdioTransport(mcpServer: MCPServerConfig) {
   // Check for uvx pattern and transform to python3 -m uv run
   if (mcpServer.command === 'uvx') {
     await installUV();
-    console.log("Detected uvx pattern, transforming to python3 -m uv run");
+    console.log('Detected uvx pattern, transforming to python3 -m uv run');
     mcpServer.command = 'python3';
     // Get the tool name (first argument)
     const toolName = mcpServer.args[0];
@@ -126,20 +136,20 @@ async function createStdioTransport(mcpServer: MCPServerConfig) {
   return new StdioMCPTransport({
     command: mcpServer.command,
     args: mcpServer.args,
-    env: Object.keys(env).length > 0 ? env : undefined
+    env: Object.keys(env).length > 0 ? env : undefined,
   });
 }
 
 async function installUV(): Promise<void> {
   const subprocess = spawn('pip3', ['install', 'uv']);
-  
+
   return new Promise((resolve, reject) => {
     subprocess.on('close', (code: number) => {
       if (code !== 0) {
         console.error(`Failed to install uv: ${code}`);
         reject(new Error(`Failed to install uv: ${code}`));
       } else {
-        console.log("installed uv");
+        console.log('installed uv');
         resolve();
       }
     });
@@ -147,16 +157,16 @@ async function installUV(): Promise<void> {
 }
 
 async function installPythonPackage(packageName: string): Promise<void> {
-  console.log("installing python package", packageName);
+  console.log('installing python package', packageName);
   const subprocess = spawn('pip3', ['install', packageName]);
-  
+
   return new Promise((resolve, reject) => {
     subprocess.on('close', (code: number) => {
       if (code !== 0) {
         console.error(`Failed to install python package: ${code}`);
         reject(new Error(`Failed to install python package: ${code}`));
       } else {
-        console.log("installed python package", packageName);
+        console.log('installed python package', packageName);
         resolve();
       }
     });
@@ -168,7 +178,7 @@ async function cleanupMCPClients(clients: any[]): Promise<void> {
     try {
       await client.close();
     } catch (error) {
-      console.error("Error closing MCP client:", error);
+      console.error('Error closing MCP client:', error);
     }
   }
-} 
+}

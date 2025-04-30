@@ -4,28 +4,28 @@ import { toast } from 'sonner';
 
 export function useChats(userId: string) {
   const queryClient = useQueryClient();
-  
+
   // Main query to fetch chats
   const {
     data: chats = [],
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery<Chat[]>({
     queryKey: ['chats', userId],
     queryFn: async () => {
       if (!userId) return [];
-      
+
       const response = await fetch('/api/chats', {
         headers: {
-          'x-user-id': userId
-        }
+          'x-user-id': userId,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch chats');
       }
-      
+
       return response.json();
     },
     enabled: !!userId, // Only run query if userId exists
@@ -39,28 +39,28 @@ export function useChats(userId: string) {
       const response = await fetch(`/api/chats/${chatId}`, {
         method: 'DELETE',
         headers: {
-          'x-user-id': userId
-        }
+          'x-user-id': userId,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete chat');
       }
-      
+
       return chatId;
     },
     onSuccess: (deletedChatId) => {
       // Update cache by removing the deleted chat
-      queryClient.setQueryData<Chat[]>(['chats', userId], (oldChats = []) => 
-        oldChats.filter(chat => chat.id !== deletedChatId)
+      queryClient.setQueryData<Chat[]>(['chats', userId], (oldChats = []) =>
+        oldChats.filter((chat) => chat.id !== deletedChatId),
       );
-      
+
       toast.success('Chat deleted');
     },
     onError: (error) => {
       console.error('Error deleting chat:', error);
       toast.error('Failed to delete chat');
-    }
+    },
   });
 
   // Function to invalidate chats cache for refresh
@@ -75,6 +75,6 @@ export function useChats(userId: string) {
     deleteChat: deleteChat.mutate,
     isDeleting: deleteChat.isPending,
     refreshChats,
-    refetch
+    refetch,
   };
-} 
+}

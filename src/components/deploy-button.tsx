@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export const DeployButton = () => (
   <Link
@@ -13,7 +13,7 @@ export const DeployButton = () => (
       strokeLinejoin="round"
       viewBox="0 0 16 16"
       width={14}
-      style={{ color: "currentcolor" }}
+      style={{ color: 'currentcolor' }}
     >
       <path
         fillRule="evenodd"

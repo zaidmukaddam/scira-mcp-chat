@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-import { STORAGE_KEYS } from "@/lib/constants";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useLocalStorage } from '@/lib/hooks/use-local-storage';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 // Define types for MCP server
 export interface KeyValuePair {
@@ -45,12 +45,12 @@ const MCPContext = createContext<MCPContextType | undefined>(undefined);
 export function MCPProvider(props: { children: React.ReactNode }) {
   const { children } = props;
   const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
-    STORAGE_KEYS.MCP_SERVERS, 
-    []
+    STORAGE_KEYS.MCP_SERVERS,
+    [],
   );
   const [selectedMcpServers, setSelectedMcpServers] = useLocalStorage<string[]>(
-    STORAGE_KEYS.SELECTED_MCP_SERVERS, 
-    []
+    STORAGE_KEYS.SELECTED_MCP_SERVERS,
+    [],
   );
   const [mcpServersForApi, setMcpServersForApi] = useState<MCPServerApi[]>([]);
 
@@ -60,30 +60,30 @@ export function MCPProvider(props: { children: React.ReactNode }) {
       setMcpServersForApi([]);
       return;
     }
-    
+
     const processedServers: MCPServerApi[] = selectedMcpServers
-      .map(id => mcpServers.find(server => server.id === id))
+      .map((id) => mcpServers.find((server) => server.id === id))
       .filter((server): server is MCPServer => Boolean(server))
-      .map(server => ({
+      .map((server) => ({
         type: server.type,
         url: server.url,
         command: server.command,
         args: server.args,
         env: server.env,
-        headers: server.headers
+        headers: server.headers,
       }));
-    
+
     setMcpServersForApi(processedServers);
   }, [mcpServers, selectedMcpServers]);
 
   return (
-    <MCPContext.Provider 
-      value={{ 
-        mcpServers, 
-        setMcpServers, 
-        selectedMcpServers, 
+    <MCPContext.Provider
+      value={{
+        mcpServers,
+        setMcpServers,
+        selectedMcpServers,
         setSelectedMcpServers,
-        mcpServersForApi 
+        mcpServersForApi,
       }}
     >
       {children}
@@ -94,7 +94,7 @@ export function MCPProvider(props: { children: React.ReactNode }) {
 export function useMCP() {
   const context = useContext(MCPContext);
   if (context === undefined) {
-    throw new Error("useMCP must be used within an MCPProvider");
+    throw new Error('useMCP must be used within an MCPProvider');
   }
   return context;
-} 
+}

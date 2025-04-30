@@ -1,6 +1,6 @@
-import Link from "next/link";
-import * as React from "react";
-import type { SVGProps } from "react";
+import Link from 'next/link';
+import * as React from 'react';
+import type { SVGProps } from 'react';
 
 export const VercelIcon = ({ size = 17 }) => {
   return (
@@ -9,7 +9,7 @@ export const VercelIcon = ({ size = 17 }) => {
       strokeLinejoin="round"
       viewBox="0 0 16 16"
       width={size}
-      style={{ color: "currentcolor" }}
+      style={{ color: 'currentcolor' }}
     >
       <title>Vercel Icon</title>
       <path
@@ -28,7 +28,7 @@ export const SpinnerIcon = ({ size = 16 }: { size?: number }) => (
     strokeLinejoin="round"
     viewBox="0 0 16 16"
     width={size}
-    style={{ color: "currentcolor" }}
+    style={{ color: 'currentcolor' }}
   >
     <title>Spinner Icon</title>
     <g clipPath="url(#clip0_2393_1490)">

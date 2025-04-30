@@ -1,5 +1,5 @@
-import { model, type modelID } from "@/ai/providers";
-import { smoothStream, streamText, type UIMessage } from "ai";
+import { model, type modelID } from '@/ai/providers';
+import { smoothStream, streamText, type UIMessage } from 'ai';
 import { appendResponseMessages } from 'ai';
 import { saveChat, saveMessages, convertToDBMessages } from '@/lib/chat-store';
 import { nanoid } from 'nanoid';
@@ -32,10 +32,10 @@ export async function POST(req: Request) {
   } = await req.json();
 
   if (!userId) {
-    return new Response(
-      JSON.stringify({ error: "User ID is required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: 'User ID is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const id = chatId || nanoid();
@@ -46,14 +46,11 @@ export async function POST(req: Request) {
   if (chatId) {
     try {
       const existingChat = await db.query.chats.findFirst({
-        where: and(
-          eq(chats.id, chatId),
-          eq(chats.userId, userId)
-        )
+        where: and(eq(chats.id, chatId), eq(chats.userId, userId)),
       });
       isNewChat = !existingChat;
     } catch (error) {
-      console.error("Error checking for existing chat:", error);
+      console.error('Error checking for existing chat:', error);
       isNewChat = true;
     }
   } else {
@@ -65,17 +62,17 @@ export async function POST(req: Request) {
   if (isNewChat && messages.length > 0) {
     try {
       // Generate a title based on first user message
-      const userMessage = messages.find(m => m.role === 'user');
+      const userMessage = messages.find((m) => m.role === 'user');
       let title = 'New Chat';
-      
+
       if (userMessage) {
         try {
           title = await generateTitle([userMessage]);
         } catch (error) {
-          console.error("Error generating title:", error);
+          console.error('Error generating title:', error);
         }
       }
-      
+
       // Save the chat immediately so it appears in the sidebar
       await saveChat({
         id,
@@ -84,15 +81,22 @@ export async function POST(req: Request) {
         messages: [],
       });
     } catch (error) {
-      console.error("Error saving new chat:", error);
+      console.error('Error saving new chat:', error);
     }
   }
 
   // Initialize MCP clients and tools using our extracted library
-  const { tools, clients: mcpClients, cleanup } = await initializeMCPClients(mcpServers, req.signal);
+  const {
+    tools,
+    clients: mcpClients,
+    cleanup,
+  } = await initializeMCPClients(mcpServers, req.signal);
 
-  console.log("messages", messages);
-  console.log("parts", messages.map(m => m.parts.map(p => p)));
+  console.log('messages', messages);
+  console.log(
+    'parts',
+    messages.map((m) => m.parts.map((p) => p)),
+  );
 
   // If there was an error setting up MCP clients but we at least have composio tools, continue
   const result = streamText({
@@ -129,11 +133,11 @@ export async function POST(req: Request) {
         },
       },
       anthropic: {
-        thinking: { 
-          type: 'enabled', 
-          budgetTokens: 12000 
+        thinking: {
+          type: 'enabled',
+          budgetTokens: 12000,
         },
-      } 
+      },
     },
     experimental_transform: smoothStream({
       delayInMs: 5, // optional: defaults to 10ms
@@ -156,27 +160,27 @@ export async function POST(req: Request) {
 
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
-      
+
       // Cleanup is now handled through the abort signal and the cleanup function
       // We could also call cleanup() here if needed
-    }
+    },
   });
 
-  result.consumeStream()
+  result.consumeStream();
   // Add chat ID to response headers so client can know which chat was created
   return result.toDataStreamResponse({
     sendReasoning: true,
     headers: {
-      'X-Chat-ID': id
+      'X-Chat-ID': id,
     },
     getErrorMessage: (error) => {
       if (error instanceof Error) {
-        if (error.message.includes("Rate limit")) {
-          return "Rate limit exceeded. Please try again later.";
+        if (error.message.includes('Rate limit')) {
+          return 'Rate limit exceeded. Please try again later.';
         }
       }
       console.error(error);
-      return "An error occurred.";
+      return 'An error occurred.';
     },
   });
 }

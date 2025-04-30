@@ -1,14 +1,14 @@
-import { defineConfig } from "tsup"
+import { defineConfig } from 'tsup';
 
-const main = "./electron/main.ts"
-const preload = "./electron/preload.ts"
+const main = './electron/main.ts';
+const preload = './electron/preload.ts';
 
 export default defineConfig({
   entry: [main, preload],
-  outDir: "electron-build",
-  external: ["electron"],
-  format: ["cjs"],
-  target: "node20",
+  outDir: 'electron-build',
+  external: ['electron'],
+  format: ['cjs'],
+  target: 'node20',
   cjsInterop: true,
   shims: true,
   clean: true,
@@ -17,4 +17,4 @@ export default defineConfig({
   skipNodeModulesBundle: true,
   treeshake: true,
   bundle: true,
-})
+});
