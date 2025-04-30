@@ -25,8 +25,13 @@ export function AutoInjectMCP() {
         const newServers: MCPServer[] = [];
         const newSelected: string[] = [];
         Object.entries(servers).forEach(([id, config]) => {
-          // Merge id into config if not present
-          const server: MCPServer = { id, ...config };
+        // Normalize env to always be an array of { key, value }
+        let env = config.env;
+        if (env && typeof env === "object" && !Array.isArray(env)) {
+          env = Object.entries(env).map(([key, value]) => ({ key, value }));
+        }
+        // Merge id and normalized env into config
+        const server: MCPServer = { id, ...config, env };
           // Add if not already present
           if (!mcpServers.some(s => s.id === id)) {
             newServers.push(server);
