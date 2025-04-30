@@ -1,15 +1,24 @@
-import { timestamp, pgTable, text, primaryKey, json } from "drizzle-orm/pg-core";
-import { nanoid } from "nanoid";
+import {
+  timestamp,
+  pgTable,
+  text,
+  primaryKey,
+  json,
+} from 'drizzle-orm/pg-core';
+import { nanoid } from 'nanoid';
 
 // Message role enum type
 export enum MessageRole {
-  USER = "user",
-  ASSISTANT = "assistant",
-  TOOL = "tool"
+  USER = 'user',
+  ASSISTANT = 'assistant',
+  TOOL = 'tool',
 }
 
 export const chats = pgTable('chats', {
-  id: text('id').primaryKey().notNull().$defaultFn(() => nanoid()),
+  id: text('id')
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
   userId: text('user_id').notNull(),
   title: text('title').notNull().default('New Chat'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -17,8 +26,13 @@ export const chats = pgTable('chats', {
 });
 
 export const messages = pgTable('messages', {
-  id: text('id').primaryKey().notNull().$defaultFn(() => nanoid()),
-  chatId: text('chat_id').notNull().references(() => chats.id, { onDelete: 'cascade' }),
+  id: text('id')
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  chatId: text('chat_id')
+    .notNull()
+    .references(() => chats.id, { onDelete: 'cascade' }),
   role: text('role').notNull(), // user, assistant, or tool
   parts: json('parts').notNull(), // Store parts as JSON in the database
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -48,4 +62,4 @@ export type DBMessage = {
   role: string;
   parts: MessagePart[];
   createdAt: Date;
-}; 
+};

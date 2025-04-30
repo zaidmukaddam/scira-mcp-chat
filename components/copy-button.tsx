@@ -1,7 +1,7 @@
-import { CheckIcon, CopyIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useCopy } from "@/lib/hooks/use-copy";
-import { Button } from "./ui/button";
+import { CheckIcon, CopyIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useCopy } from '@/lib/hooks/use-copy';
+import { Button } from './ui/button';
 
 interface CopyButtonProps {
   text: string;
@@ -16,8 +16,8 @@ export function CopyButton({ text, className }: CopyButtonProps) {
       variant="ghost"
       size="sm"
       className={cn(
-        "transition-opacity opacity-0 group-hover/message:opacity-100 gap-1.5",
-        className
+        'transition-opacity opacity-0 group-hover/message:opacity-100 gap-1.5',
+        className,
       )}
       onClick={() => copy(text)}
       title="Copy to clipboard"
@@ -35,4 +35,4 @@ export function CopyButton({ text, className }: CopyButtonProps) {
       )}
     </Button>
   );
-} 
+}

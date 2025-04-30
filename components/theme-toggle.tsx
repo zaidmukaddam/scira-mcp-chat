@@ -1,14 +1,22 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { CircleDashed, Flame, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "./ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import * as React from 'react';
+import { CircleDashed, Flame, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
-export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof Button>) {
-  const { setTheme } = useTheme()
+export function ThemeToggle({
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -26,24 +34,24 @@ export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => setTheme("dark")}>
+        <DropdownMenuItem onSelect={() => setTheme('dark')}>
           <Flame className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setTheme("light")}>
+        <DropdownMenuItem onSelect={() => setTheme('light')}>
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setTheme("black")}>
+        <DropdownMenuItem onSelect={() => setTheme('black')}>
           <CircleDashed className="mr-2 h-4 w-4" />
           <span>Black</span>
         </DropdownMenuItem>
         {/* sunset theme */}
-        <DropdownMenuItem onSelect={() => setTheme("sunset")}>
+        <DropdownMenuItem onSelect={() => setTheme('sunset')}>
           <Sun className="mr-2 h-4 w-4" />
           <span>Sunset</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -19,7 +19,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   // Initialize state from localStorage or use initialValue
   useEffect(() => {
     if (!isBrowser) return;
-    
+
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
@@ -32,27 +32,30 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   // Return a wrapped version of useState's setter function that
   // persists the new value to localStorage.
-  const setValue = useCallback((value: SetValue<T>) => {
-    if (!isBrowser) return;
-    
-    try {
-      // Allow value to be a function so we have same API as useState
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value;
-      
-      // Save state
-      setStoredValue(valueToStore);
-      
-      // Save to localStorage
-      if (valueToStore === undefined) {
-        window.localStorage.removeItem(key);
-      } else {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+  const setValue = useCallback(
+    (value: SetValue<T>) => {
+      if (!isBrowser) return;
+
+      try {
+        // Allow value to be a function so we have same API as useState
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
+        // Save state
+        setStoredValue(valueToStore);
+
+        // Save to localStorage
+        if (valueToStore === undefined) {
+          window.localStorage.removeItem(key);
+        } else {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+      } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
       }
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue, isBrowser]);
+    },
+    [key, storedValue, isBrowser],
+  );
 
   return [storedValue, setValue] as const;
 }
@@ -76,4 +79,4 @@ function parseJSON<T>(value: string): T {
 export function useLocalStorageValue<T>(key: string, defaultValue: T): T {
   const [value] = useLocalStorage<T>(key, defaultValue);
   return value;
-} 
+}

@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import { ChevronDownIcon } from "lucide-react"
+import * as React from 'react';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import { ChevronDownIcon } from 'lucide-react';
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils';
 
 function Accordion({
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
-  return <AccordionPrimitive.Root data-slot="accordion" {...props} />
+  return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
 }
 
 function AccordionItem({
@@ -19,10 +19,10 @@ function AccordionItem({
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
-      className={cn("mb-1", className)}
+      className={cn('mb-1', className)}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionTrigger({
@@ -35,8 +35,8 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "focus-visible:ring-ring/30 flex flex-1 items-center justify-between py-3 text-left text-sm font-medium transition-all outline-none focus-visible:ring-2 rounded-md disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
-          className
+          'focus-visible:ring-ring/30 flex flex-1 items-center justify-between py-3 text-left text-sm font-medium transition-all outline-none focus-visible:ring-2 rounded-md disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
+          className,
         )}
         {...props}
       >
@@ -44,7 +44,7 @@ function AccordionTrigger({
         <ChevronDownIcon className="text-muted-foreground/70 size-3.5 shrink-0 transition-transform duration-200" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  );
 }
 
 function AccordionContent({
@@ -58,9 +58,9 @@ function AccordionContent({
       className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       {...props}
     >
-      <div className={cn("py-2 pl-1", className)}>{children}</div>
+      <div className={cn('py-2 pl-1', className)}>{children}</div>
     </AccordionPrimitive.Content>
-  )
+  );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

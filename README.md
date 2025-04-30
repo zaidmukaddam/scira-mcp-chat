@@ -38,12 +38,14 @@ This application supports connecting to Model Context Protocol (MCP) servers to 
 #### SSE Configuration
 
 If you select SSE transport:
+
 1. Enter the server URL (e.g., `https://mcp.example.com/token/sse`)
 2. Click "Add Server"
 
 #### stdio Configuration
 
 If you select stdio transport:
+
 1. Enter the command to execute (e.g., `npx`)
 2. Enter the command arguments (e.g., `-y @modelcontextprotocol/server-google-maps`)
    - You can enter space-separated arguments or paste a JSON array
@@ -64,6 +66,7 @@ You can use any MCP-compatible server with this application. Here are some examp
 This project supports automatic injection of MCP (Model Context Protocol) servers at runtime using a root-level `mcp.json` file. This allows you to pre-configure which MCP servers are available and which should be enabled by default when the app starts.
 
 ### How It Works
+
 - Place an `mcp.json` file in your project root.
 - Define all desired MCP servers under the `mcpServers` object.
 - Each server configuration can include:
@@ -74,6 +77,7 @@ This project supports automatic injection of MCP (Model Context Protocol) server
   - `autoEnable`: If `true`, the server will be enabled automatically at app launch.
 
 **Best Practices:**
+
 - Use `args` to keep your command line flexible and easy to update without changing the command itself.
 - Store sensitive information like API keys in `env` and reference environment variables as needed.
 - You can add as many custom environment variables as your MCP server supports.
@@ -81,16 +85,14 @@ This project supports automatic injection of MCP (Model Context Protocol) server
 The app will read this file at startup and inject all listed servers into the UI. Servers with `autoEnable: true` will be selected for immediate use.
 
 ### Sample mcp.json
+
 ```json
 {
   "mcpServers": {
     "github": {
       "type": "stdio", // type of server, e.g., sse or stdio
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
       },
