@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "motion/react";
-import { Button } from "./ui/button";
-import { memo } from "react";
+import { motion } from 'motion/react';
+import { Button } from './ui/button';
+import { memo } from 'react';
 
 interface SuggestedPromptsProps {
   sendMessage: (input: string) => void;
@@ -11,14 +11,14 @@ interface SuggestedPromptsProps {
 function PureSuggestedPrompts({ sendMessage }: SuggestedPromptsProps) {
   const suggestedActions = [
     {
-      title: "What are the advantages",
-      label: "of using Next.js?",
-      action: "What are the advantages of using Next.js?",
+      title: 'What are the advantages',
+      label: 'of using Next.js?',
+      action: 'What are the advantages of using Next.js?',
     },
     {
-      title: "What is the weather",
-      label: "in San Francisco?",
-      action: "What is the weather in San Francisco?",
+      title: 'What is the weather',
+      label: 'in San Francisco?',
+      action: 'What is the weather in San Francisco?',
     },
   ];
 
@@ -34,7 +34,7 @@ function PureSuggestedPrompts({ sendMessage }: SuggestedPromptsProps) {
           exit={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.05 * index }}
           key={`suggested-action-${suggestedAction.title}-${index}`}
-          className={index > 1 ? "hidden sm:block" : "block"}
+          className={index > 1 ? 'hidden sm:block' : 'block'}
         >
           <Button
             variant="ghost"

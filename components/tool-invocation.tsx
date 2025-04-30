@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -11,8 +11,8 @@ import {
   Code,
   ArrowRight,
   Circle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ToolInvocationProps {
   toolName: string;
@@ -39,34 +39,36 @@ export function ToolInvocation({
       opacity: 0,
     },
     expanded: {
-      height: "auto",
+      height: 'auto',
       opacity: 1,
     },
   };
 
   const getStatusIcon = () => {
-    if (state === "call") {
-      if (isLatestMessage && status !== "ready") {
+    if (state === 'call') {
+      if (isLatestMessage && status !== 'ready') {
         return <Loader2 className="animate-spin h-3.5 w-3.5 text-primary/70" />;
       }
-      return <Circle className="h-3.5 w-3.5 fill-muted-foreground/10 text-muted-foreground/70" />;
+      return (
+        <Circle className="h-3.5 w-3.5 fill-muted-foreground/10 text-muted-foreground/70" />
+      );
     }
     return <CheckCircle2 size={14} className="text-primary/90" />;
   };
 
   const getStatusClass = () => {
-    if (state === "call") {
-      if (isLatestMessage && status !== "ready") {
-        return "text-primary";
+    if (state === 'call') {
+      if (isLatestMessage && status !== 'ready') {
+        return 'text-primary';
       }
-      return "text-muted-foreground";
+      return 'text-muted-foreground';
     }
-    return "text-primary";
+    return 'text-primary';
   };
 
   const formatContent = (content: any): string => {
     try {
-      if (typeof content === "string") {
+      if (typeof content === 'string') {
         try {
           const parsed = JSON.parse(content);
           return JSON.stringify(parsed, null, 2);
@@ -81,15 +83,17 @@ export function ToolInvocation({
   };
 
   return (
-    <div className={cn(
-      "flex flex-col mb-2 rounded-md border border-border/50 overflow-hidden",
-      "bg-gradient-to-b from-background to-muted/30 backdrop-blur-sm",
-      "transition-all duration-200 hover:border-border/80 group"
-    )}>
-      <div 
+    <div
+      className={cn(
+        'flex flex-col mb-2 rounded-md border border-border/50 overflow-hidden',
+        'bg-gradient-to-b from-background to-muted/30 backdrop-blur-sm',
+        'transition-all duration-200 hover:border-border/80 group',
+      )}
+    >
+      <div
         className={cn(
-          "flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors",
-          "hover:bg-muted/20"
+          'flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors',
+          'hover:bg-muted/20',
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -97,10 +101,16 @@ export function ToolInvocation({
           <TerminalSquare className="h-3.5 w-3.5" />
         </div>
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground flex-1">
-          <span className="text-foreground font-semibold tracking-tight">{toolName}</span>
+          <span className="text-foreground font-semibold tracking-tight">
+            {toolName}
+          </span>
           <ArrowRight className="h-3 w-3 text-muted-foreground/50" />
-          <span className={cn("font-medium", getStatusClass())}>
-            {state === "call" ? (isLatestMessage && status !== "ready" ? "Running" : "Waiting") : "Completed"}
+          <span className={cn('font-medium', getStatusClass())}>
+            {state === 'call'
+              ? isLatestMessage && status !== 'ready'
+                ? 'Running'
+                : 'Waiting'
+              : 'Completed'}
           </span>
         </div>
         <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
@@ -131,25 +141,29 @@ export function ToolInvocation({
                   <Code className="h-3 w-3" />
                   <span className="font-medium">Arguments</span>
                 </div>
-                <pre className={cn(
-                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto",
-                  "border border-border/40 bg-muted/10"
-                )}>
+                <pre
+                  className={cn(
+                    'text-xs font-mono p-2.5 rounded-md overflow-x-auto',
+                    'border border-border/40 bg-muted/10',
+                  )}
+                >
                   {formatContent(args)}
                 </pre>
               </div>
             )}
-            
+
             {!!result && (
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
                   <ArrowRight className="h-3 w-3" />
                   <span className="font-medium">Result</span>
                 </div>
-                <pre className={cn(
-                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto",
-                  "border border-border/40 bg-muted/10"
-                )}>
+                <pre
+                  className={cn(
+                    'text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto',
+                    'border border-border/40 bg-muted/10',
+                  )}
+                >
                   {formatContent(result)}
                 </pre>
               </div>
@@ -159,4 +173,4 @@ export function ToolInvocation({
       </AnimatePresence>
     </div>
   );
-} 
+}
