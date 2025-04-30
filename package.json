@@ -95,6 +95,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.2",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.4",
     "@types/eventsource": "^3.0.0",
