@@ -70,9 +70,7 @@ This project supports automatic injection of MCP (Model Context Protocol) server
   - `type`: The type of server (e.g., `stdio`, `sse`, `http`).
   - `command`: The command to launch the MCP server (e.g., `npx`, `python3`).
   - `args`: An array of arguments to pass to the command. For example, `['-y', '@modelcontextprotocol/server-github']` will run `npx -y @modelcontextprotocol/server-github`.
-    - Use this to specify package names, flags, or script entry points.
   - `env`: An object of environment variables to set when launching the server. For example, `{ "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN" }` will set the token in the server's environment.
-    - Use this for API keys, model configuration, or any server-specific environment settings.
   - `autoEnable`: If `true`, the server will be enabled automatically at app launch.
 
 **Best Practices:**
