@@ -1,18 +1,12 @@
 {
-    "$schema": "https://schema.railpack.com",
-    "provider": "node",
-    "buildAptPackages": [
-        "git",
-        "curl"
-    ],
-    "packages": {
-        "node": "22",
-        "python": "3.12.7"
-    },
-    "deploy": {
-        "aptPackages": [
-            "git",
-            "curl"
-        ]
-    }
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "buildAptPackages": ["git", "curl"],
+  "packages": {
+    "node": "22",
+    "python": "3.12.7"
+  },
+  "deploy": {
+    "aptPackages": ["git", "curl"]
+  }
 }
