@@ -37,6 +37,12 @@ import {
     AccordionTrigger
 } from "./ui/accordion";
 import { KeyValuePair, MCPServer, ServerStatus, useMCP } from "@/lib/context/mcp-context";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "./ui/tooltip";
 
 // Default template for a new MCP server
 const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
@@ -79,42 +85,67 @@ const maskValue = (value: string): string => {
     return value.substring(0, 3) + '•'.repeat(Math.min(10, value.length - 4)) + value.substring(value.length - 1);
 };
 
-const StatusIndicator = ({ status, onClick }: { status?: ServerStatus, onClick?: () => void }) => {
+// Update the StatusIndicator to use Tooltip component
+const StatusIndicator = ({ status, onClick, hoverInfo }: { 
+    status?: ServerStatus, 
+    onClick?: () => void,
+    hoverInfo?: string
+}) => {
     const isClickable = !!onClick;
+    const hasHoverInfo = !!hoverInfo;
     
-    const className = `flex-shrink-0 flex items-center gap-1 ${isClickable ? 'cursor-pointer hover:underline' : ''}`;
+    const className = `flex-shrink-0 flex items-center gap-1 ${isClickable ? 'cursor-pointer' : ''}`;
     
-    switch (status) {
-        case 'connected':
-            return (
-                <div className={className} onClick={onClick}>
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-xs text-green-500">Connected</span>
-                </div>
-            );
-        case 'connecting':
-            return (
-                <div className={className} onClick={onClick}>
-                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
-                    <span className="text-xs text-amber-500">Connecting</span>
-                </div>
-            );
-        case 'error':
-            return (
-                <div className={className} onClick={onClick}>
-                    <AlertTriangle className="w-3 h-3 text-red-500" />
-                    <span className="text-xs text-red-500">Error</span>
-                </div>
-            );
-        case 'disconnected':
-        default:
-            return (
-                <div className={className} onClick={onClick}>
-                    <div className="w-2 h-2 rounded-full bg-gray-400" />
-                    <span className="text-xs text-muted-foreground">Disconnected</span>
-                </div>
-            );
+    const statusIndicator = (status: ServerStatus | undefined) => {
+        switch (status) {
+            case 'connected':
+                return (
+                    <div className={className} onClick={onClick}>
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs text-green-500 hover:underline">Connected</span>
+                    </div>
+                );
+            case 'connecting':
+                return (
+                    <div className={className} onClick={onClick}>
+                        <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                        <span className="text-xs text-amber-500">Connecting</span>
+                    </div>
+                );
+            case 'error':
+                return (
+                    <div className={className} onClick={onClick}>
+                        <AlertTriangle className="w-3 h-3 text-red-500" />
+                        <span className="text-xs text-red-500 hover:underline">Error</span>
+                    </div>
+                );
+            case 'disconnected':
+            default:
+                return (
+                    <div className={className} onClick={onClick}>
+                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                        <span className="text-xs text-muted-foreground">Disconnected</span>
+                    </div>
+                );
+        }
+    };
+    
+    // Use Tooltip if we have hover info
+    if (hasHoverInfo) {
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    {statusIndicator(status)}
+                </TooltipTrigger>
+                <TooltipContent side="top" align="center" className="max-w-[300px] break-all text-wrap">
+                    {hoverInfo}
+                </TooltipContent>
+            </Tooltip>
+        );
     }
+    
+    // Otherwise just return the status indicator
+    return statusIndicator(status);
 };
 
 export const MCPServerManager = ({
@@ -466,16 +497,25 @@ export const MCPServerManager = ({
 
     // UI element to display the correct server URL
     const getServerDisplayUrl = (server: MCPServer): string => {
-        // For stdio servers with active sandbox, show the sandbox URL
-        if (server.type === 'stdio' && server.sandboxUrl && 
-            (server.status === 'connected' || server.status === 'connecting')) {
-            return server.sandboxUrl;
-        }
-        
-        // Otherwise show the configured URL or command
+        // Always show the configured URL or command, not the sandbox URL
         return server.type === 'sse' 
             ? server.url 
             : `${server.command} ${server.args?.join(' ')}`;
+    };
+
+    // Update the hover info function to return richer content
+    const getServerStatusHoverInfo = (server: MCPServer): string | undefined => {
+        // For connected stdio servers, show the sandbox URL as hover info
+        if (server.type === 'stdio' && server.status === 'connected' && server.sandboxUrl) {
+            return `Running at: ${server.sandboxUrl}`;
+        }
+        
+        // For error status, show the error message
+        if (server.status === 'error' && server.errorMessage) {
+            return `Error: ${server.errorMessage}`;
+        }
+        
+        return undefined;
     };
 
     return (
@@ -554,6 +594,7 @@ export const MCPServerManager = ({
                                                             <StatusIndicator 
                                                                 status={server.status} 
                                                                 onClick={() => server.errorMessage && toast.error(server.errorMessage)}
+                                                                hoverInfo={getServerStatusHoverInfo(server)}
                                                             />
                                                             
                                                             {/* Server actions */}
