@@ -1,32 +1,20 @@
 import { model, type modelID } from "@/ai/providers";
-import { streamText, type UIMessage } from "ai";
+import { smoothStream, streamText, type UIMessage } from "ai";
 import { appendResponseMessages } from 'ai';
 import { saveChat, saveMessages, convertToDBMessages } from '@/lib/chat-store';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
 import { chats } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { initializeMCPClients, type MCPServerConfig } from '@/lib/mcp-client';
+import { generateTitle } from '@/app/actions';
 
-import { experimental_createMCPClient as createMCPClient, MCPTransport } from 'ai';
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
-import { spawn } from "child_process";
+export const runtime = 'nodejs';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 120;
 
-interface KeyValuePair {
-  key: string;
-  value: string;
-}
-
-interface MCPServerConfig {
-  url: string;
-  type: 'sse' | 'stdio';
-  command?: string;
-  args?: string[];
-  env?: KeyValuePair[];
-  headers?: KeyValuePair[];
-}
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   const {
@@ -53,7 +41,7 @@ export async function POST(req: Request) {
   const id = chatId || nanoid();
 
   // Check if chat already exists for the given ID
-  // If not, we'll create it in onFinish
+  // If not, create it now
   let isNewChat = false;
   if (chatId) {
     try {
@@ -66,7 +54,6 @@ export async function POST(req: Request) {
       isNewChat = !existingChat;
     } catch (error) {
       console.error("Error checking for existing chat:", error);
-      // Continue anyway, we'll create the chat in onFinish
       isNewChat = true;
     }
   } else {
@@ -74,125 +61,44 @@ export async function POST(req: Request) {
     isNewChat = true;
   }
 
-  // Initialize tools
-  let tools = {};
-  const mcpClients: any[] = [];
-
-  // Process each MCP server configuration
-  for (const mcpServer of mcpServers) {
+  // If it's a new chat, save it immediately
+  if (isNewChat && messages.length > 0) {
     try {
-      // Create appropriate transport based on type
-      let transport: MCPTransport | { type: 'sse', url: string, headers?: Record<string, string> };
-
-      if (mcpServer.type === 'sse') {
-        // Convert headers array to object for SSE transport
-        const headers: Record<string, string> = {};
-        if (mcpServer.headers && mcpServer.headers.length > 0) {
-          mcpServer.headers.forEach(header => {
-            if (header.key) headers[header.key] = header.value || '';
-          });
+      // Generate a title based on first user message
+      const userMessage = messages.find(m => m.role === 'user');
+      let title = 'New Chat';
+      
+      if (userMessage) {
+        try {
+          title = await generateTitle([userMessage]);
+        } catch (error) {
+          console.error("Error generating title:", error);
         }
-
-        transport = {
-          type: 'sse' as const,
-          url: mcpServer.url,
-          headers: Object.keys(headers).length > 0 ? headers : undefined
-        };
-      } else if (mcpServer.type === 'stdio') {
-        // For stdio transport, we need command and args
-        if (!mcpServer.command || !mcpServer.args || mcpServer.args.length === 0) {
-          console.warn("Skipping stdio MCP server due to missing command or args");
-          continue;
-        }
-
-        // Convert env array to object for stdio transport
-        const env: Record<string, string> = {};
-        if (mcpServer.env && mcpServer.env.length > 0) {
-          mcpServer.env.forEach(envVar => {
-            if (envVar.key) env[envVar.key] = envVar.value || '';
-          });
-        }
-
-        // Check for uvx pattern and transform to python3 -m uv run
-        if (mcpServer.command === 'uvx') {
-          // install uv
-          const subprocess = spawn('pip3', ['install', 'uv']);
-          subprocess.on('close', (code: number) => {
-            if (code !== 0) {
-              console.error(`Failed to install uv: ${code}`);
-            }
-          });
-          // wait for the subprocess to finish
-          await new Promise((resolve) => {
-            subprocess.on('close', resolve);
-            console.log("installed uv");
-          });
-          console.log("Detected uvx pattern, transforming to python3 -m uv run");
-          mcpServer.command = 'python3';
-          // Get the tool name (first argument)
-          const toolName = mcpServer.args[0];
-          // Replace args with the new pattern
-          mcpServer.args = ['-m', 'uv', 'run', toolName, ...mcpServer.args.slice(1)];
-        }
-        // if python is passed in the command, install the python package mentioned in args after -m with subprocess or use regex to find the package name
-        else if (mcpServer.command.includes('python3')) {
-          const packageName = mcpServer.args[mcpServer.args.indexOf('-m') + 1];
-          console.log("installing python package", packageName);
-          const subprocess = spawn('pip3', ['install', packageName]);
-          subprocess.on('close', (code: number) => {
-            if (code !== 0) {
-              console.error(`Failed to install python package: ${code}`);
-            }
-          });
-          // wait for the subprocess to finish
-          await new Promise((resolve) => {
-            subprocess.on('close', resolve);
-            console.log("installed python package", packageName);
-          });
-        }
-
-        transport = new StdioMCPTransport({
-          command: mcpServer.command,
-          args: mcpServer.args,
-          env: Object.keys(env).length > 0 ? env : undefined
-        });
-      } else {
-        console.warn(`Skipping MCP server with unsupported transport type: ${mcpServer.type}`);
-        continue;
       }
-
-      const mcpClient = await createMCPClient({ transport });
-      mcpClients.push(mcpClient);
-
-      const mcptools = await mcpClient.tools();
-
-      console.log(`MCP tools from ${mcpServer.type} transport:`, Object.keys(mcptools));
-
-      // Add MCP tools to tools object
-      tools = { ...tools, ...mcptools };
+      
+      // Save the chat immediately so it appears in the sidebar
+      await saveChat({
+        id,
+        userId,
+        title,
+        messages: [],
+      });
     } catch (error) {
-      console.error("Failed to initialize MCP client:", error);
-      // Continue with other servers instead of failing the entire request
+      console.error("Error saving new chat:", error);
     }
   }
 
-  // Register cleanup for all clients
-  if (mcpClients.length > 0) {
-    req.signal.addEventListener('abort', async () => {
-      for (const client of mcpClients) {
-        try {
-          await client.close();
-        } catch (error) {
-          console.error("Error closing MCP client:", error);
-        }
-      }
-    });
-  }
+  // Initialize MCP clients using the already running persistent SSE servers
+  // mcpServers now only contains SSE configurations since stdio servers
+  // have been converted to SSE in the MCP context
+  const { tools, cleanup } = await initializeMCPClients(mcpServers, req.signal);
 
   console.log("messages", messages);
   console.log("parts", messages.map(m => m.parts.map(p => p)));
 
-  // If there was an error setting up MCP clients but we at least have composio tools, continue
+  // Track if the response has completed
+  let responseCompleted = false;
+
   const result = streamText({
     model: model.languageModel(selectedModel),
     system: `You are a helpful assistant with access to a variety of tools.
@@ -233,10 +139,15 @@ export async function POST(req: Request) {
         },
       } 
     },
+    experimental_transform: smoothStream({
+      delayInMs: 5, // optional: defaults to 10ms
+      chunking: 'line', // optional: defaults to 'word'
+    }),
     onError: (error) => {
       console.error(JSON.stringify(error, null, 2));
     },
     async onFinish({ response }) {
+      responseCompleted = true;
       const allMessages = appendResponseMessages({
         messages,
         responseMessages: response.messages,
@@ -250,16 +161,32 @@ export async function POST(req: Request) {
 
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
-      // close all mcp clients
-      // for (const client of mcpClients) {
-      //   await client.close();
-      // }
+      
+      // Clean up resources - now this just closes the client connections
+      // not the actual servers which persist in the MCP context
+      await cleanup();
+    }
+  });
+
+  // Ensure cleanup happens if the request is terminated early
+  req.signal.addEventListener('abort', async () => {
+    if (!responseCompleted) {
+      console.log("Request aborted, cleaning up resources");
+      try {
+        await cleanup();
+      } catch (error) {
+        console.error("Error during cleanup on abort:", error);
+      }
     }
   });
 
   result.consumeStream()
+  // Add chat ID to response headers so client can know which chat was created
   return result.toDataStreamResponse({
     sendReasoning: true,
+    headers: {
+      'X-Chat-ID': id
+    },
     getErrorMessage: (error) => {
       if (error instanceof Error) {
         if (error.message.includes("Rate limit")) {

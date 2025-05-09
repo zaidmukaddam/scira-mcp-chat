@@ -24,7 +24,10 @@ import {
     Cog,
     Edit2,
     Eye,
-    EyeOff
+    EyeOff,
+    AlertTriangle,
+    RefreshCw,
+    Power
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -33,7 +36,7 @@ import {
     AccordionItem,
     AccordionTrigger
 } from "./ui/accordion";
-import { KeyValuePair, MCPServer } from "@/lib/context/mcp-context";
+import { KeyValuePair, MCPServer, ServerStatus, useMCP } from "@/lib/context/mcp-context";
 
 // Default template for a new MCP server
 const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
@@ -76,6 +79,44 @@ const maskValue = (value: string): string => {
     return value.substring(0, 3) + '•'.repeat(Math.min(10, value.length - 4)) + value.substring(value.length - 1);
 };
 
+const StatusIndicator = ({ status, onClick }: { status?: ServerStatus, onClick?: () => void }) => {
+    const isClickable = !!onClick;
+    
+    const className = `flex-shrink-0 flex items-center gap-1 ${isClickable ? 'cursor-pointer hover:underline' : ''}`;
+    
+    switch (status) {
+        case 'connected':
+            return (
+                <div className={className} onClick={onClick}>
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs text-green-500">Connected</span>
+                </div>
+            );
+        case 'connecting':
+            return (
+                <div className={className} onClick={onClick}>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-xs text-amber-500">Connecting</span>
+                </div>
+            );
+        case 'error':
+            return (
+                <div className={className} onClick={onClick}>
+                    <AlertTriangle className="w-3 h-3 text-red-500" />
+                    <span className="text-xs text-red-500">Error</span>
+                </div>
+            );
+        case 'disconnected':
+        default:
+            return (
+                <div className={className} onClick={onClick}>
+                    <div className="w-2 h-2 rounded-full bg-gray-400" />
+                    <span className="text-xs text-muted-foreground">Disconnected</span>
+                </div>
+            );
+    }
+};
+
 export const MCPServerManager = ({
     servers,
     onServersChange,
@@ -95,6 +136,9 @@ export const MCPServerManager = ({
     const [editingHeaderIndex, setEditingHeaderIndex] = useState<number | null>(null);
     const [editedEnvValue, setEditedEnvValue] = useState<string>('');
     const [editedHeaderValue, setEditedHeaderValue] = useState<string>('');
+    
+    // Add access to the MCP context for server control
+    const { startServer, stopServer, updateServerStatus } = useMCP();
 
     const resetAndClose = () => {
         setView('list');
@@ -356,6 +400,57 @@ export const MCPServerManager = ({
         setShowSensitiveHeaderValues({});
     };
 
+    // Add functions to control servers
+    const toggleServerStatus = async (server: MCPServer, e: React.MouseEvent) => {
+        e.stopPropagation();
+        
+        if (!server.status || server.status === 'disconnected' || server.status === 'error') {
+            // Start the server
+            try {
+                const success = await startServer(server.id);
+                if (success) {
+                    toast.success(`Started server: ${server.name}`);
+                } else {
+                    toast.error(`Failed to start server: ${server.name}`);
+                }
+            } catch (error) {
+                toast.error(`Error starting server: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        } else {
+            // Stop the server
+            try {
+                await stopServer(server.id);
+                toast.success(`Stopped server: ${server.name}`);
+            } catch (error) {
+                toast.error(`Error stopping server: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+    };
+
+    // Add function to restart a server
+    const restartServer = async (server: MCPServer, e: React.MouseEvent) => {
+        e.stopPropagation();
+        
+        try {
+            // First stop it if it's running
+            if (server.status === 'connected' || server.status === 'connecting') {
+                await stopServer(server.id);
+            }
+            
+            // Then start it again
+            updateServerStatus(server.id, 'connecting');
+            const success = await startServer(server.id);
+            
+            if (success) {
+                toast.success(`Restarted server: ${server.name}`);
+            } else {
+                toast.error(`Failed to restart server: ${server.name}`);
+            }
+        } catch (error) {
+            toast.error(`Error restarting server: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[480px] max-h-[85vh] overflow-hidden flex flex-col">
@@ -396,6 +491,8 @@ export const MCPServerManager = ({
                                             })
                                             .map((server) => {
                                             const isActive = selectedServers.includes(server.id);
+                                            const isRunning = server.status === 'connected' || server.status === 'connecting';
+
                                             return (
                                                 <div
                                                     key={server.id}
@@ -406,7 +503,7 @@ export const MCPServerManager = ({
                                                             : 'border-border hover:border-primary/30 hover:bg-primary/5'}
                           `}
                                                 >
-                                                    {/* Server Header with Type Badge and Delete Button */}
+                                                    {/* Server Header with Type Badge and Actions */}
                                                     <div className="flex items-center justify-between mb-2">
                                                         <div className="flex items-center gap-2">
                                                             {server.type === 'sse' ? (
@@ -414,7 +511,7 @@ export const MCPServerManager = ({
                                                             ) : (
                                                                 <Terminal className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             )}
-                                                            <h4 className="text-sm font-medium truncate max-w-[220px]">{server.name}</h4>
+                                                            <h4 className="text-sm font-medium truncate max-w-[160px]">{server.name}</h4>
                                                             {hasAdvancedConfig(server) && (
                                                                 <span className="flex-shrink-0">
                                                                     <Cog className="h-3 w-3 text-muted-foreground" />
@@ -425,20 +522,52 @@ export const MCPServerManager = ({
                                                             <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                                                                 {server.type.toUpperCase()}
                                                             </span>
-                                                            <button
-                                                                onClick={(e) => removeServer(server.id, e)}
-                                                                className="p-1 rounded-full hover:bg-muted/70"
-                                                                aria-label="Remove server"
-                                                            >
-                                                                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => startEditing(server)}
-                                                                className="p-1 rounded-full hover:bg-muted/50"
-                                                                aria-label="Edit server"
-                                                            >
-                                                                <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                                            </button>
+                                                            
+                                                            {/* Status indicator */}
+                                                            <StatusIndicator 
+                                                                status={server.status} 
+                                                                onClick={() => server.errorMessage && toast.error(server.errorMessage)}
+                                                            />
+                                                            
+                                                            {/* Server actions */}
+                                                            <div className="flex items-center">
+                                                                <button
+                                                                    onClick={(e) => toggleServerStatus(server, e)}
+                                                                    className="p-1 rounded-full hover:bg-muted/70"
+                                                                    aria-label={isRunning ? "Stop server" : "Start server"}
+                                                                    title={isRunning ? "Stop server" : "Start server"}
+                                                                >
+                                                                    <Power className={`h-3.5 w-3.5 ${isRunning ? 'text-red-500' : 'text-green-500'}`} />
+                                                                </button>
+                                                                
+                                                                <button
+                                                                    onClick={(e) => restartServer(server, e)}
+                                                                    className="p-1 rounded-full hover:bg-muted/70"
+                                                                    aria-label="Restart server"
+                                                                    title="Restart server"
+                                                                    disabled={server.status === 'connecting'}
+                                                                >
+                                                                    <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${server.status === 'connecting' ? 'opacity-50' : ''}`} />
+                                                                </button>
+                                                                
+                                                                <button
+                                                                    onClick={(e) => removeServer(server.id, e)}
+                                                                    className="p-1 rounded-full hover:bg-muted/70"
+                                                                    aria-label="Remove server"
+                                                                    title="Remove server"
+                                                                >
+                                                                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                                                </button>
+                                                                
+                                                                <button
+                                                                    onClick={() => startEditing(server)}
+                                                                    className="p-1 rounded-full hover:bg-muted/50"
+                                                                    aria-label="Edit server"
+                                                                    title="Edit server"
+                                                                >
+                                                                    <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
 
