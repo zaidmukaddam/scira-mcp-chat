@@ -35,7 +35,7 @@ export const startMcpSandbox = async ({
   // python -m mcp_server_time --local-timezone=Asia/Kolkata
   const isPythonCommand = cmd.startsWith('python') || cmd.startsWith('python3');
   let installResult = null;
-  
+
   if (isPythonCommand) {
     const packageName = cmd.split("-m ")[1]?.split(" ")[0] || "";
     if (packageName) {
@@ -48,13 +48,13 @@ export const startMcpSandbox = async ({
         1000 * 300 // 5 minutes
       );
       console.log("install result", installUv.output);
-      if (installUv.exitCode !== 0) {
+      if (installUv.exitCode !== undefined) {
         console.error("Failed to install package");
       }
       installResult = installUv;
     }
   }
-  
+
   console.log("Starting mcp server...");
   // generate a session with random id
   const mcpServer = await sandbox.process.executeSessionCommand(sessionId,
@@ -65,13 +65,15 @@ export const startMcpSandbox = async ({
     1000 * 300 // 5 minutes
   );
   console.log("mcp server result", mcpServer.output);
+
+  if (mcpServer.exitCode !== undefined) {
+    console.error("Failed to start mcp server. Exit code:", mcpServer.exitCode);
+  }
+
   const session = await sandbox.process.getSession(sessionId);
   console.log(`Session ${sessionId}:`);
   for (const command of session.commands || []) {
     console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
-  }
-  if (mcpServer.exitCode !== 0) {
-    console.error("Failed to start mcp server. Exit code:", mcpServer.exitCode);
   }
 
   console.log("MCP server started at:", url + "/sse");
