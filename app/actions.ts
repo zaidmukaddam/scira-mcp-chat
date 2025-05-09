@@ -86,6 +86,8 @@ export async function startSandbox(params: {
 }): Promise<{ url: string }> {
   const { id, command, args, env } = params;
   
+  console.log(`[startSandbox] Starting sandbox for ID: ${id}`);
+  
   // Validate required fields
   if (!id || !command || !args) {
     throw new Error('Missing required fields');
@@ -95,7 +97,27 @@ export async function startSandbox(params: {
   if (activeSandboxes.has(id)) {
     // If we do, get the URL and return it without creating a new sandbox
     const existingSandbox = activeSandboxes.get(id);
-    return { url: existingSandbox.url };
+    console.log(`[startSandbox] Reusing existing sandbox for ${id}, URL: ${existingSandbox.url}`);
+    
+    // Re-fetch the URL to make sure it's current
+    try {
+      const freshUrl = await existingSandbox.sandbox.getUrl();
+      console.log(`[startSandbox] Updated sandbox URL for ${id}: ${freshUrl}`);
+      
+      // Update the URL in the map
+      activeSandboxes.set(id, { 
+        sandbox: existingSandbox.sandbox, 
+        url: freshUrl 
+      });
+      
+      return { url: freshUrl };
+    } catch (error) {
+      console.error(`[startSandbox] Error refreshing sandbox URL for ${id}:`, error);
+      
+      // Fall through to create a new sandbox if we couldn't refresh the URL
+      activeSandboxes.delete(id);
+      console.log(`[startSandbox] Removed stale sandbox for ${id}, will create a new one`);
+    }
   }
   
   // Build the command string
@@ -123,9 +145,11 @@ export async function startSandbox(params: {
   }
   
   // Start the sandbox
-  console.log(`Starting sandbox for ${id} with command: ${cmd}`);
+  console.log(`[startSandbox] Creating new sandbox for ${id} with command: ${cmd}`);
   const sandbox = await startMcpSandbox({ cmd, envs });
   const url = await sandbox.getUrl();
+  
+  console.log(`[startSandbox] Sandbox created for ${id}, URL: ${url}`);
   
   // Store the sandbox in our map
   activeSandboxes.set(id, { sandbox, url });

@@ -51,36 +51,41 @@ export default function Chat() {
   }, [chatId]);
   
   // Use React Query to fetch chat history
-  const { data: chatData, isLoading: isLoadingChat } = useQuery({
+  const { data: chatData, isLoading: isLoadingChat, error } = useQuery({
     queryKey: ['chat', chatId, userId] as const,
     queryFn: async ({ queryKey }) => {
       const [_, chatId, userId] = queryKey;
       if (!chatId || !userId) return null;
       
-      try {
-        const response = await fetch(`/api/chats/${chatId}`, {
-          headers: {
-            'x-user-id': userId
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to load chat');
+      const response = await fetch(`/api/chats/${chatId}`, {
+        headers: {
+          'x-user-id': userId
         }
-        
-        const data = await response.json();
-        return data as ChatData;
-      } catch (error) {
-        console.error('Error loading chat history:', error);
-        toast.error('Failed to load chat history');
-        throw error;
+      });
+      
+      if (!response.ok) {
+        // For 404, return empty chat data instead of throwing
+        if (response.status === 404) {
+          return { id: chatId, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        }
+        throw new Error('Failed to load chat');
       }
+      
+      return response.json() as Promise<ChatData>;
     },
     enabled: !!chatId && !!userId,
     retry: 1,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false
   });
+  
+  // Handle query errors
+  useEffect(() => {
+    if (error) {
+      console.error('Error loading chat history:', error);
+      toast.error('Failed to load chat history');
+    }
+  }, [error]);
   
   // Prepare initial messages from query data
   const initialMessages = useMemo(() => {

@@ -25,22 +25,21 @@ export default function ChatPage() {
       await queryClient.prefetchQuery({
         queryKey: ['chat', chatId, userId] as const,
         queryFn: async () => {
-          try {
-            const response = await fetch(`/api/chats/${chatId}`, {
-              headers: {
-                'x-user-id': userId
-              }
-            });
-            
-            if (!response.ok) {
-              throw new Error('Failed to load chat');
+          const response = await fetch(`/api/chats/${chatId}`, {
+            headers: {
+              'x-user-id': userId
             }
-            
-            return response.json();
-          } catch (error) {
-            console.error('Error prefetching chat:', error);
-            return null;
+          });
+          
+          if (!response.ok) {
+            // For 404, return empty chat data instead of throwing
+            if (response.status === 404) {
+              return { id: chatId, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            }
+            throw new Error('Failed to load chat');
           }
+          
+          return response.json();
         },
         staleTime: 1000 * 60 * 5, // 5 minutes
       });

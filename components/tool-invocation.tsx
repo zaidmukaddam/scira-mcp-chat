@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -32,17 +31,6 @@ export function ToolInvocation({
   status,
 }: ToolInvocationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const variants = {
-    collapsed: {
-      height: 0,
-      opacity: 0,
-    },
-    expanded: {
-      height: "auto",
-      opacity: 1,
-    },
-  };
 
   const getStatusIcon = () => {
     if (state === "call") {
@@ -115,48 +103,39 @@ export function ToolInvocation({
         </div>
       </div>
 
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial="collapsed"
-            animate="expanded"
-            exit="collapsed"
-            variants={variants}
-            transition={{ duration: 0.2 }}
-            className="space-y-2 px-3 pb-3"
-          >
-            {!!args && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70 pt-1.5">
-                  <Code className="h-3 w-3" />
-                  <span className="font-medium">Arguments</span>
-                </div>
-                <pre className={cn(
-                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto",
-                  "border border-border/40 bg-muted/10"
-                )}>
-                  {formatContent(args)}
-                </pre>
+      {isExpanded && (
+        <div className="space-y-2 px-3 pb-3">
+          {!!args && (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70 pt-1.5">
+                <Code className="h-3 w-3" />
+                <span className="font-medium">Arguments</span>
               </div>
-            )}
-            
-            {!!result && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
-                  <ArrowRight className="h-3 w-3" />
-                  <span className="font-medium">Result</span>
-                </div>
-                <pre className={cn(
-                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto",
-                  "border border-border/40 bg-muted/10"
-                )}>
-                  {formatContent(result)}
-                </pre>
+              <pre className={cn(
+                "text-xs font-mono p-2.5 rounded-md overflow-x-auto",
+                "border border-border/40 bg-muted/10"
+              )}>
+                {formatContent(args)}
+              </pre>
+            </div>
+          )}
+          
+          {!!result && (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
+                <ArrowRight className="h-3 w-3" />
+                <span className="font-medium">Result</span>
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <pre className={cn(
+                "text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto",
+                "border border-border/40 bg-muted/10"
+              )}>
+                {formatContent(result)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 } 

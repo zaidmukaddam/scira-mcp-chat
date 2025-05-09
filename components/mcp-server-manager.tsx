@@ -196,16 +196,18 @@ export const MCPServerManager = ({
 
     const toggleServer = (id: string) => {
         if (selectedServers.includes(id)) {
-            // Remove from selected servers
+            // Remove from selected servers but DON'T stop the server
             onSelectedServersChange(selectedServers.filter(serverId => serverId !== id));
             const server = servers.find(s => s.id === id);
+            
             if (server) {
                 toast.success(`Disabled MCP server: ${server.name}`);
             }
         } else {
-            // Add to selected servers
+            // Add to selected servers but DON'T auto-start
             onSelectedServersChange([...selectedServers, id]);
             const server = servers.find(s => s.id === id);
+            
             if (server) {
                 toast.success(`Enabled MCP server: ${server.name}`);
             }
@@ -214,6 +216,7 @@ export const MCPServerManager = ({
 
     const clearAllServers = () => {
         if (selectedServers.length > 0) {
+            // Just deselect all servers without stopping them
             onSelectedServersChange([]);
             toast.success("All MCP servers disabled");
             resetAndClose();
@@ -400,55 +403,79 @@ export const MCPServerManager = ({
         setShowSensitiveHeaderValues({});
     };
 
-    // Add functions to control servers
+    // Update functions to control servers
     const toggleServerStatus = async (server: MCPServer, e: React.MouseEvent) => {
         e.stopPropagation();
         
         if (!server.status || server.status === 'disconnected' || server.status === 'error') {
-            // Start the server
             try {
+                updateServerStatus(server.id, 'connecting');
                 const success = await startServer(server.id);
+                
                 if (success) {
                     toast.success(`Started server: ${server.name}`);
                 } else {
                     toast.error(`Failed to start server: ${server.name}`);
                 }
             } catch (error) {
+                updateServerStatus(server.id, 'error', 
+                    `Error: ${error instanceof Error ? error.message : String(error)}`);
                 toast.error(`Error starting server: ${error instanceof Error ? error.message : String(error)}`);
             }
         } else {
-            // Stop the server
             try {
-                await stopServer(server.id);
-                toast.success(`Stopped server: ${server.name}`);
+                const success = await stopServer(server.id);
+                if (success) {
+                    toast.success(`Stopped server: ${server.name}`);
+                } else {
+                    toast.error(`Failed to stop server: ${server.name}`);
+                }
             } catch (error) {
                 toast.error(`Error stopping server: ${error instanceof Error ? error.message : String(error)}`);
             }
         }
     };
 
-    // Add function to restart a server
+    // Update function to restart a server
     const restartServer = async (server: MCPServer, e: React.MouseEvent) => {
         e.stopPropagation();
         
         try {
-            // First stop it if it's running
+            // First stop it
             if (server.status === 'connected' || server.status === 'connecting') {
                 await stopServer(server.id);
             }
             
-            // Then start it again
-            updateServerStatus(server.id, 'connecting');
-            const success = await startServer(server.id);
-            
-            if (success) {
-                toast.success(`Restarted server: ${server.name}`);
-            } else {
-                toast.error(`Failed to restart server: ${server.name}`);
-            }
+            // Then start it again (with delay to ensure proper cleanup)
+            setTimeout(async () => {
+                updateServerStatus(server.id, 'connecting');
+                const success = await startServer(server.id);
+                
+                if (success) {
+                    toast.success(`Restarted server: ${server.name}`);
+                } else {
+                    toast.error(`Failed to restart server: ${server.name}`);
+                }
+            }, 500);
         } catch (error) {
+            updateServerStatus(server.id, 'error', 
+                `Error: ${error instanceof Error ? error.message : String(error)}`);
             toast.error(`Error restarting server: ${error instanceof Error ? error.message : String(error)}`);
         }
+    };
+
+    // UI element to display the correct server URL
+    const getServerDisplayUrl = (server: MCPServer): string => {
+        // For stdio servers with active sandbox, show the sandbox URL
+        if (server.type === 'stdio' && server.sandboxUrl && 
+            (server.status === 'connected' || server.status === 'connecting')) {
+            return server.sandboxUrl;
+        }
+        
+        // Otherwise show the configured URL or command
+        return server.type === 'sse' 
+            ? server.url 
+            : `${server.command} ${server.args?.join(' ')}`;
     };
 
     return (
@@ -573,10 +600,7 @@ export const MCPServerManager = ({
 
                                                     {/* Server Details */}
                                                     <p className="text-xs text-muted-foreground mb-2.5 truncate">
-                                                        {server.type === 'sse'
-                                                            ? server.url
-                                                            : `${server.command} ${server.args?.join(' ')}`
-                                                        }
+                                                        {getServerDisplayUrl(server)}
                                                     </p>
 
                                                     {/* Action Button */}

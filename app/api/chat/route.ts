@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       // Generate a title based on first user message
       const userMessage = messages.find(m => m.role === 'user');
       let title = 'New Chat';
-      
+
       if (userMessage) {
         try {
           title = await generateTitle([userMessage]);
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
           console.error("Error generating title:", error);
         }
       }
-      
+
       // Save the chat immediately so it appears in the sidebar
       await saveChat({
         id,
@@ -133,11 +133,11 @@ export async function POST(req: Request) {
         },
       },
       anthropic: {
-        thinking: { 
-          type: 'enabled', 
-          budgetTokens: 12000 
+        thinking: {
+          type: 'enabled',
+          budgetTokens: 12000
         },
-      } 
+      }
     },
     experimental_transform: smoothStream({
       delayInMs: 5, // optional: defaults to 10ms
@@ -161,7 +161,7 @@ export async function POST(req: Request) {
 
       const dbMessages = convertToDBMessages(allMessages, id);
       await saveMessages({ messages: dbMessages });
-      
+
       // Clean up resources - now this just closes the client connections
       // not the actual servers which persist in the MCP context
       await cleanup();

@@ -1,5 +1,5 @@
 // import Sandbox from "@e2b/code-interpreter";
-import { Daytona, Sandbox, SandboxTargetRegion } from "@daytonaio/sdk";
+import { Daytona, Sandbox } from "@daytonaio/sdk";
 
 export const startMcpSandbox = async ({
   cmd,
@@ -9,82 +9,95 @@ export const startMcpSandbox = async ({
   envs?: Record<string, string>
 }) => {
   console.log("Creating sandbox...");
-  const daytona = new Daytona();
-  const sandbox = await daytona.create({
-    resources: {
-      cpu: 2,
-      memory: 4,
-      disk: 5,
-    },
-    public: true,
-    autoStopInterval: 0, // 24 hours
-    timeout: 1000 * 300, // 5 minutes
-    envVars: {
-      ...envs,
-    },
-  });
+  
+  try {
+    const daytona = new Daytona();
+    const sandbox = await daytona.create({
+      resources: {
+        cpu: 2,
+        memory: 4,
+        disk: 5,
+      },
+      public: true,
+      autoStopInterval: 0,
+      envVars: {
+        ...envs,
+      },
+    });
 
-  const host = await sandbox.getPreviewLink(3000);
-  const url = host.url;
-  const token = host.token;
-  console.log("url", url);
-  console.log("token", token);
+    const host = await sandbox.getPreviewLink(3000);
+    const url = host.url;
+    const token = host.token;
+    console.log("url", url);
+    console.log("token", token);
 
-  const sessionId = Math.random().toString(36).substring(2, 30);
-  await sandbox.process.createSession(sessionId);
-  // python -m mcp_server_time --local-timezone=Asia/Kolkata
-  const isPythonCommand = cmd.startsWith('python') || cmd.startsWith('python3');
-  let installResult = null;
+    const sessionId = Math.random().toString(36).substring(2, 30);
+    await sandbox.process.createSession(sessionId);
+    
+    // Handle Python package installation if command is a Python command
+    const isPythonCommand = cmd.startsWith('python') || cmd.startsWith('python3');
+    let installResult = null;
 
-  if (isPythonCommand) {
-    const packageName = cmd.split("-m ")[1]?.split(" ")[0] || "";
-    if (packageName) {
-      console.log(`Installing Python package: ${packageName}`);
-      const installUv = await sandbox.process.executeSessionCommand(sessionId, {
-        // Install python package from the command after -m in the command
-        command: `pip install ${packageName}`,
+    if (isPythonCommand) {
+      const packageName = cmd.split("-m ")[1]?.split(" ")[0] || "";
+      if (packageName) {
+        console.log(`Installing Python package: ${packageName}`);
+        installResult = await sandbox.process.executeSessionCommand(
+          sessionId,
+          {
+            command: `pip install ${packageName}`,
+            runAsync: true,
+          },
+          1000 * 300 // 5 minutes
+        );
+        
+        console.log("install result", installResult.output);
+        if (installResult.exitCode) {
+          console.error(`Failed to install package ${packageName}. Exit code: ${installResult.exitCode}`);
+        }
+      }
+    }
+
+    console.log("Starting mcp server...");
+    // Run the MCP server using supergateway
+    const mcpServer = await sandbox.process.executeSessionCommand(
+      sessionId,
+      {
+        command: `npx -y supergateway --base-url ${url} --header "x-daytona-preview-token: ${token}" --port 3000 --cors --stdio "${cmd}"`,
         runAsync: true,
       },
-        1000 * 300 // 5 minutes
-      );
-      console.log("install result", installUv.output);
-      if (installUv.exitCode !== undefined) {
-        console.error("Failed to install package");
-      }
-      installResult = installUv;
+      0
+    );
+    
+    console.log("mcp server result", mcpServer.output);
+
+    if (mcpServer.exitCode) {
+      console.error("Failed to start mcp server. Exit code:", mcpServer.exitCode);
+      throw new Error(`MCP server failed to start with exit code ${mcpServer.exitCode}`);
     }
+
+    // Log detailed session information
+    const session = await sandbox.process.getSession(sessionId);
+    console.log(`Session ${sessionId}:`);
+    for (const command of session.commands || []) {
+      console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
+    }
+
+    console.log("MCP server started at:", url + "/sse");
+    return new McpSandbox(sandbox, sessionId);
+  } catch (error) {
+    console.error("Error starting MCP sandbox:", error);
+    throw error;
   }
-
-  console.log("Starting mcp server...");
-  // generate a session with random id
-  const mcpServer = await sandbox.process.executeSessionCommand(sessionId,
-    {
-      command: `npx -y supergateway --base-url ${url} --header "x-daytona-preview-token: ${token}" --port 3000 --cors --stdio "${cmd}"`,
-      runAsync: true,
-    },
-    1000 * 300 // 5 minutes
-  );
-  console.log("mcp server result", mcpServer.output);
-
-  if (mcpServer.exitCode !== undefined) {
-    console.error("Failed to start mcp server. Exit code:", mcpServer.exitCode);
-  }
-
-  const session = await sandbox.process.getSession(sessionId);
-  console.log(`Session ${sessionId}:`);
-  for (const command of session.commands || []) {
-    console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
-  }
-
-  console.log("MCP server started at:", url + "/sse");
-  return new McpSandbox(sandbox);
 }
 
 class McpSandbox {
   public sandbox: Sandbox;
+  private sessionId?: string;
 
-  constructor(sandbox: Sandbox) {
+  constructor(sandbox: Sandbox, sessionId?: string) {
     this.sandbox = sandbox;
+    this.sessionId = sessionId;
   }
 
   async getUrl(): Promise<string> {
@@ -95,8 +108,26 @@ class McpSandbox {
     return `${host.url}/sse`;
   }
 
+  async getSessionInfo(): Promise<any> {
+    if (!this.sandbox || !this.sessionId) {
+      throw new Error("Sandbox or session not initialized");
+    }
+    
+    const session = await this.sandbox.process.getSession(this.sessionId);
+    return session;
+  }
+
   async stop(): Promise<void> {
-    await this.sandbox.delete();
+    if (!this.sandbox) {
+      throw new Error("Sandbox not initialized");
+    }
+    
+    try {
+      await this.sandbox.delete();
+    } catch (error) {
+      console.error("Error stopping sandbox:", error);
+      throw error;
+    }
   }
 }
 

@@ -21,24 +21,6 @@ export interface MCPClientManager {
   cleanup: () => Promise<void>;
 }
 
-async function waitForServerReady(url: string, maxAttempts = 5) {
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const response = await fetch(url)
-      if (response.status === 200) {
-        console.log(`Server ready at ${url} after ${i + 1} attempts`)
-        return true
-      }
-      console.log(`Server not ready yet (attempt ${i + 1}), status: ${response.status}`)
-    } catch {
-      console.log(`Server connection failed (attempt ${i + 1})`)
-    }
-    // Wait 6 seconds between attempts
-    await new Promise(resolve => setTimeout(resolve, 6000))
-  }
-  return false
-}
-
 /**
  * Initialize MCP clients for API calls
  * This uses the already running persistent SSE servers

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Message as TMessage } from "ai";
-import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useState } from "react";
 import equal from "fast-deep-equal";
 import { Markdown } from "./markdown";
@@ -91,35 +90,28 @@ export function ReasoningMessagePart({
         </button>
       )}
 
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            key="reasoning"
-            className={cn(
-              "text-sm text-muted-foreground flex flex-col gap-2",
-              "pl-3.5 ml-0.5 mt-1",
-              "border-l border-amber-200/50 dark:border-amber-700/30"
-            )}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-          >
-            <div className="text-xs text-muted-foreground/70 pl-1 font-medium">
-              The assistant&apos;s thought process:
-            </div>
-            {part.details.map((detail, detailIndex) =>
-              detail.type === "text" ? (
-                <div key={detailIndex} className="px-2 py-1.5 bg-muted/10 rounded-md border border-border/30">
-                  <Markdown>{detail.text}</Markdown>
-                </div>
-              ) : (
-                "<redacted>"
-              ),
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isExpanded && (
+        <div
+          className={cn(
+            "text-sm text-muted-foreground flex flex-col gap-2",
+            "pl-3.5 ml-0.5 mt-1",
+            "border-l border-amber-200/50 dark:border-amber-700/30"
+          )}
+        >
+          <div className="text-xs text-muted-foreground/70 pl-1 font-medium">
+            The assistant&apos;s thought process:
+          </div>
+          {part.details.map((detail, detailIndex) =>
+            detail.type === "text" ? (
+              <div key={detailIndex} className="px-2 py-1.5 bg-muted/10 rounded-md border border-border/30">
+                <Markdown>{detail.text}</Markdown>
+              </div>
+            ) : (
+              "<redacted>"
+            ),
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -147,93 +139,88 @@ const PurePreviewMessage = ({
   const shouldShowCopyButton = message.role === "assistant" && (!isLatestMessage || status !== "streaming");
 
   return (
-    <AnimatePresence key={message.id}>
-      <motion.div
+    <div
+      className={cn(
+        "w-full mx-auto px-4 group/message",
+        message.role === "assistant" ? "mb-8" : "mb-6"
+      )}
+      data-role={message.role}
+    >
+      <div
         className={cn(
-          "w-full mx-auto px-4 group/message",
-          message.role === "assistant" ? "mb-8" : "mb-6"
+          "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
+          "group-data-[role=user]/message:w-fit",
         )}
-        initial={{ y: 5, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        key={`message-${message.id}`}
-        data-role={message.role}
       >
-        <div
-          className={cn(
-            "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
-            "group-data-[role=user]/message:w-fit",
-          )}
-        >
-          <div className="flex flex-col w-full space-y-3">
-            {message.parts?.map((part, i) => {
-              switch (part.type) {
-                case "text":
-                  return (
-                    <motion.div
-                      initial={{ y: 5, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      key={`message-${message.id}-part-${i}`}
-                      className="flex flex-row gap-2 items-start w-full"
+        <div className="flex flex-col w-full space-y-3">
+          {message.parts?.map((part, i) => {
+            switch (part.type) {
+              case "text":
+                return (
+                  <div
+                    key={`message-${message.id}-part-${i}`}
+                    className="flex flex-row gap-2 items-start w-full"
+                  >
+                    <div
+                      className={cn("flex flex-col gap-3 w-full", {
+                        "bg-secondary text-secondary-foreground px-4 py-3 rounded-2xl":
+                          message.role === "user",
+                      })}
                     >
-                      <div
-                        className={cn("flex flex-col gap-3 w-full", {
-                          "bg-secondary text-secondary-foreground px-4 py-3 rounded-2xl":
-                            message.role === "user",
-                        })}
-                      >
-                        <Markdown>{part.text}</Markdown>
-                      </div>
-                    </motion.div>
-                  );
-                case "tool-invocation":
-                  const { toolName, state, args } = part.toolInvocation;
-                  const result = 'result' in part.toolInvocation ? part.toolInvocation.result : null;
-                  
-                  return (
-                    <ToolInvocation
-                      key={`message-${message.id}-part-${i}`}
-                      toolName={toolName}
-                      state={state}
-                      args={args}
-                      result={result}
-                      isLatestMessage={isLatestMessage}
-                      status={status}
-                    />
-                  );
-                case "reasoning":
-                  return (
-                    <ReasoningMessagePart
-                      key={`message-${message.id}-${i}`}
-                      // @ts-expect-error part
-                      part={part}
-                      isReasoning={
-                        (message.parts &&
-                          status === "streaming" &&
-                          i === message.parts.length - 1) ??
-                        false
-                      }
-                    />
-                  );
-                default:
-                  return null;
-              }
-            })}
-            {shouldShowCopyButton && (
-              <div className="flex justify-start mt-2">
-                <CopyButton text={getMessageText()} />
-              </div>
-            )}
-          </div>
+                      <Markdown>{part.text}</Markdown>
+                    </div>
+                  </div>
+                );
+              case "tool-invocation":
+                const { toolName, state, args } = part.toolInvocation;
+                const result = 'result' in part.toolInvocation ? part.toolInvocation.result : null;
+                
+                return (
+                  <ToolInvocation
+                    key={`message-${message.id}-part-${i}`}
+                    toolName={toolName}
+                    state={state}
+                    args={args}
+                    result={result}
+                    isLatestMessage={isLatestMessage}
+                    status={status}
+                  />
+                );
+              case "reasoning":
+                return (
+                  <ReasoningMessagePart
+                    key={`message-${message.id}-${i}`}
+                    // @ts-expect-error part
+                    part={part}
+                    isReasoning={
+                      (message.parts &&
+                        status === "streaming" &&
+                        i === message.parts.length - 1) ??
+                      false
+                    }
+                  />
+                );
+              default:
+                return null;
+            }
+          })}
+          {shouldShowCopyButton && (
+            <div className="flex justify-start mt-2">
+              <CopyButton text={getMessageText()} />
+            </div>
+          )}
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };
 
 export const Message = memo(PurePreviewMessage, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) return false;
-  if (prevProps.message.annotations !== nextProps.message.annotations)
-    return false;
+  if (prevProps.isLoading !== nextProps.isLoading) return false;
+  if (prevProps.isLatestMessage !== nextProps.isLatestMessage) return false;
+  if (prevProps.message.annotations !== nextProps.message.annotations) return false;
+  if (prevProps.message.id !== nextProps.message.id) return false;
   if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
   return true;
 });
