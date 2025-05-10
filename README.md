@@ -57,6 +57,7 @@ You can use any MCP-compatible server with this application. Here are some examp
 
 - [Composio](https://composio.dev/mcp) - Provides search, code interpreter, and other tools
 - [Zapier MCP](https://zapier.com/mcp) - Provides access to Zapier tools
+- [GitMCP](https://gitmcp.io) - Provides a remote MCP server for any GitHub repo documentation
 - Any MCP server using stdio transport with npx and python3
 
 ## License
