@@ -43,6 +43,13 @@ const API_KEYS_CONFIG: ApiKeyConfig[] = [
     storageKey: "XAI_API_KEY",
     label: "XAI API Key",
     placeholder: "xai-..."
+  },
+  {
+    name: "Ollama",
+    key: "ollama",
+    storageKey: "OLLAMA_BASE_URL",
+    label: "Ollama Base URL",
+    placeholder: "http://localhost:11434"
   }
 ];
 

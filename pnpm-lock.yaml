@@ -26,6 +26,9 @@ importers:
       '@ai-sdk/xai':
         specifier: ^1.2.16
         version: 1.2.16(zod@3.24.2)
+      '@ai-sdk/ollama':
+        specifier: ^1.2.0
+        version: 1.2.0(zod@3.24.2)
       '@daytonaio/sdk':
         specifier: ^0.17.0
         version: 0.17.0
@@ -238,6 +241,12 @@ packages:
 
   '@ai-sdk/xai@1.2.16':
     resolution: {integrity: sha512-UOZT8td9PWwMi2dF9a0U44t/Oltmf6QmIJdSvrOcLG4mvpRc1UJn6YJaR0HtXs3YnW6SvY1zRdIDrW4GFpv4NA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/ollama@1.2.0':
+    resolution: {integrity: sha512-0000000000000000000000000000000000000000000000000000000000000000000000000000}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -3685,6 +3694,13 @@ snapshots:
       zod-to-json-schema: 3.24.5(zod@3.24.2)
 
   '@ai-sdk/xai@1.2.16(zod@3.24.2)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 0.2.14(zod@3.24.2)
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.2)
+      zod: 3.24.2
+
+  '@ai-sdk/ollama@1.2.0(zod@3.24.2)':
     dependencies:
       '@ai-sdk/openai-compatible': 0.2.14(zod@3.24.2)
       '@ai-sdk/provider': 1.1.3

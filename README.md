@@ -20,6 +20,7 @@
 - Multiple MCP transport types (SSE and stdio) for connecting to various tool providers.
 - Built-in tool integration for extending AI capabilities.
 - Reasoning model support.
+- Local model support via [Ollama](https://github.com/ollama/ollama).
 - [shadcn/ui](https://ui.shadcn.com/) components for a modern, responsive UI powered by [Tailwind CSS](https://tailwindcss.com).
 - Built with the latest [Next.js](https://nextjs.org) App Router.
 
