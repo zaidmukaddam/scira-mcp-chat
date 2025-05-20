@@ -40,7 +40,6 @@ import { KeyValuePair, MCPServer, ServerStatus, useMCP } from "@/lib/context/mcp
 import {
     Tooltip,
     TooltipContent,
-    TooltipProvider,
     TooltipTrigger,
 } from "./ui/tooltip";
 
