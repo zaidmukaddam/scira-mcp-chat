@@ -2,6 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createGroq } from "@ai-sdk/groq";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createXai } from "@ai-sdk/xai";
+import { createOllama } from "@ai-sdk/ollama";
 
 import { 
   customProvider, 
@@ -53,6 +54,10 @@ const xaiClient = createXai({
   apiKey: getApiKey('XAI_API_KEY'),
 });
 
+const ollamaClient = createOllama({
+  baseUrl: getApiKey('OLLAMA_BASE_URL') || 'http://localhost:11434',
+});
+
 const languageModels = {
   "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
   "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
@@ -63,6 +68,12 @@ const languageModels = {
     }
   ),
   "grok-3-mini": xaiClient("grok-3-mini-latest"),
+  "llama3": wrapLanguageModel(
+    {
+      model: ollamaClient("llama3"),
+      middleware
+    }
+  ),
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
@@ -93,6 +104,13 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     description: "Latest version of XAI's Grok 3 Mini with strong reasoning and coding capabilities.",
     apiVersion: "grok-3-mini-latest",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
+  },
+  "llama3": {
+    provider: "Ollama",
+    name: "Llama 3",
+    description: "Open source Llama 3 model running via Ollama.",
+    apiVersion: "llama3",
+    capabilities: ["Reasoning", "Agentic"]
   },
 };
 
