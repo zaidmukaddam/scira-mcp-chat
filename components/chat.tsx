@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import { getUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-import { STORAGE_KEYS } from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
@@ -153,7 +152,7 @@ export default function Chat() {
   const isLoading = status === "streaming" || status === "submitted" || isLoadingChat;
 
   return (
-    <div className="h-dvh flex flex-col justify-center w-full max-w-3xl mx-auto px-4 sm:px-6 md:py-4">
+    <div className="h-dvh flex flex-col justify-center w-full max-w-[430px] sm:max-w-3xl mx-auto px-4 sm:px-6 py-3">
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
@@ -179,7 +178,7 @@ export default function Chat() {
           </div>
           <form
             onSubmit={handleFormSubmit}
-            className="mt-2 w-full mx-auto mb-4 sm:mb-auto"
+            className="mt-2 w-full mx-auto"
           >
             <Textarea
               selectedModel={selectedModel}

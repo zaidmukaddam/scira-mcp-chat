@@ -9,10 +9,11 @@ export const startMcpSandbox = async ({
   envs?: Record<string, string>
 }) => {
   console.log("Creating sandbox...");
-  
+
   try {
     const daytona = new Daytona();
-    const sandbox = await daytona.create({
+    const sandbox = await daytona.create(
+      {
       resources: {
         cpu: 2,
         memory: 4,
@@ -23,7 +24,11 @@ export const startMcpSandbox = async ({
       envVars: {
         ...envs,
       },
-    });
+    },
+      {
+        timeout: 0,
+      }
+    );
 
     const host = await sandbox.getPreviewLink(3000);
     const url = host.url;
@@ -33,7 +38,7 @@ export const startMcpSandbox = async ({
 
     const sessionId = Math.random().toString(36).substring(2, 30);
     await sandbox.process.createSession(sessionId);
-    
+
     // Handle Python package installation if command is a Python command
     const isPythonCommand = cmd.startsWith('python') || cmd.startsWith('python3');
     let installResult = null;
@@ -50,7 +55,7 @@ export const startMcpSandbox = async ({
           },
           1000 * 300 // 5 minutes
         );
-        
+
         console.log("install result", installResult.output);
         if (installResult.exitCode) {
           console.error(`Failed to install package ${packageName}. Exit code: ${installResult.exitCode}`);
@@ -68,7 +73,7 @@ export const startMcpSandbox = async ({
       },
       0
     );
-    
+
     console.log("mcp server result", mcpServer.output);
 
     if (mcpServer.exitCode) {
@@ -112,22 +117,36 @@ class McpSandbox {
     if (!this.sandbox || !this.sessionId) {
       throw new Error("Sandbox or session not initialized");
     }
-    
+
     const session = await this.sandbox.process.getSession(this.sessionId);
     return session;
+  }
+
+  async start(): Promise<void> {
+    if (!this.sandbox) {
+      throw new Error("Sandbox not initialized");
+    }
+    await this.sandbox.start();
   }
 
   async stop(): Promise<void> {
     if (!this.sandbox) {
       throw new Error("Sandbox not initialized");
     }
-    
+
     try {
-      await this.sandbox.delete();
+      await this.sandbox.stop();
     } catch (error) {
       console.error("Error stopping sandbox:", error);
       throw error;
     }
+  }
+
+  async delete(): Promise<void> {
+    if (!this.sandbox) {
+      throw new Error("Sandbox not initialized");
+    }
+    await this.sandbox.delete();
   }
 }
 

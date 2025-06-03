@@ -235,11 +235,29 @@ export const MCPServerManager = ({
                 toast.success(`Disabled MCP server: ${server.name}`);
             }
         } else {
-            // Add to selected servers but DON'T auto-start
+            // Add to selected servers
             onSelectedServersChange([...selectedServers, id]);
             const server = servers.find(s => s.id === id);
             
             if (server) {
+                // Auto-start the server if it's disconnected
+                if (!server.status || server.status === 'disconnected' || server.status === 'error') {
+                    updateServerStatus(server.id, 'connecting');
+                    startServer(id)
+                        .then(success => {
+                            if (success) {
+                                console.log(`Server ${server.name} successfully connected`);
+                            } else {
+                                console.error(`Failed to connect server ${server.name}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error connecting server ${server.name}:`, error);
+                            updateServerStatus(server.id, 'error', 
+                                `Failed to connect: ${error instanceof Error ? error.message : String(error)}`);
+                        });
+                }
+                
                 toast.success(`Enabled MCP server: ${server.name}`);
             }
         }
