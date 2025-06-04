@@ -81,13 +81,6 @@ export const startMcpSandbox = async ({
       throw new Error(`MCP server failed to start with exit code ${mcpServer.exitCode}`);
     }
 
-    // Log detailed session information
-    const session = await sandbox.process.getSession(sessionId);
-    console.log(`Session ${sessionId}:`);
-    for (const command of session.commands || []) {
-      console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
-    }
-
     console.log("MCP server started at:", url + "/sse");
     return new McpSandbox(sandbox, sessionId);
   } catch (error) {
