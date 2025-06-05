@@ -48,7 +48,7 @@ import {
 const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
     name: '',
     url: '',
-    type: 'httpOrSse',
+    type: 'sse',
     command: 'node',
     args: [],
     env: [],
@@ -189,7 +189,7 @@ export const MCPServerManager = ({
             return;
         }
 
-        if (newServer.type === 'httpOrSse' && !newServer.url) {
+        if (newServer.type === 'sse' && !newServer.url) {
             toast.error("Server URL is required for HTTP or SSE transport");
             return;
         }
@@ -432,7 +432,7 @@ export const MCPServerManager = ({
             toast.error("Server name is required");
             return;
         }
-        if (newServer.type === 'httpOrSse' && !newServer.url) {
+        if (newServer.type === 'sse' && !newServer.url) {
             toast.error("Server URL is required for HTTP or SSE transport");
             return;
         }
@@ -516,7 +516,7 @@ export const MCPServerManager = ({
     // UI element to display the correct server URL
     const getServerDisplayUrl = (server: MCPServer): string => {
         // Always show the configured URL or command, not the sandbox URL
-        return server.type === 'httpOrSse' 
+        return server.type === 'sse' 
             ? server.url 
             : `${server.command} ${server.args?.join(' ')}`;
     };
@@ -591,7 +591,7 @@ export const MCPServerManager = ({
                                                     {/* Server Header with Type Badge and Actions */}
                                                     <div className="flex items-center justify-between mb-2">
                                                         <div className="flex items-center gap-2">
-                                                            {server.type === 'httpOrSse' ? (
+                                                            {server.type === 'sse' ? (
                                                                 <Globe className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
                                                             ) : (
                                                                 <Terminal className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'} flex-shrink-0`} />
@@ -729,14 +729,14 @@ export const MCPServerManager = ({
                                     <div className="grid gap-2 grid-cols-2">
                                         <button
                                             type="button"
-                                            onClick={() => setNewServer({ ...newServer, type: 'httpOrSse' })}
+                                            onClick={() => setNewServer({ ...newServer, type: 'sse' })}
                                             className={`flex items-center gap-2 p-3 rounded-md text-left border transition-all ${
-                                                newServer.type === 'httpOrSse' 
+                                                newServer.type === 'sse' 
                                                     ? 'border-primary bg-primary/10 ring-1 ring-primary' 
                                                     : 'border-border hover:border-border/80 hover:bg-muted/50'
                                             }`}
                                         >
-                                            <Globe className={`h-5 w-5 shrink-0 ${newServer.type === 'httpOrSse' ? 'text-primary' : ''}`} />
+                                            <Globe className={`h-5 w-5 shrink-0 ${newServer.type === 'sse' ? 'text-primary' : ''}`} />
                                             <div>
                                                 <p className="font-medium">HTTP / SSE</p>
                                                 <p className="text-xs text-muted-foreground">Server-Sent Events</p>
@@ -762,7 +762,7 @@ export const MCPServerManager = ({
                                 </div>
                             </div>
 
-                            {newServer.type === 'httpOrSse' ? (
+                            {newServer.type === 'sse' ? (
                                 <div className="grid gap-1.5">
                                     <Label htmlFor="url">
                                         Server URL
@@ -940,7 +940,7 @@ export const MCPServerManager = ({
 
                                 <AccordionItem value="headers">
                                     <AccordionTrigger className="text-sm py-2">
-                                        {newServer.type === 'httpOrSse' ? 'HTTP Headers' : 'Additional Configuration'}
+                                        {newServer.type === 'sse' ? 'HTTP Headers' : 'Additional Configuration'}
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="space-y-3">
@@ -1050,11 +1050,11 @@ export const MCPServerManager = ({
                                                 </div>
                                             ) : (
                                                 <p className="text-xs text-muted-foreground text-center py-2">
-                                                    No {newServer.type === 'httpOrSse' ? 'headers' : 'additional configuration'} added
+                                                    No {newServer.type === 'sse' ? 'headers' : 'additional configuration'} added
                                                 </p>
                                             )}
                                             <p className="text-xs text-muted-foreground">
-                                                {newServer.type === 'httpOrSse'
+                                                {newServer.type === 'sse'
                                                     ? 'HTTP headers will be sent with requests to the HTTP or SSE endpoint.'
                                                     : 'Additional configuration parameters for the stdio transport.'}
                                             </p>
@@ -1098,7 +1098,7 @@ export const MCPServerManager = ({
                                 onClick={editingServerId ? updateServer : addServer}
                                 disabled={
                                     !newServer.name ||
-                                    (newServer.type === 'httpOrSse' && !newServer.url) ||
+                                    (newServer.type === 'sse' && !newServer.url) ||
                                     (newServer.type === 'stdio' && (!newServer.command || !newServer.args?.length))
                                 }
                             >

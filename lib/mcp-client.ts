@@ -8,7 +8,7 @@ export interface KeyValuePair {
 
 export interface MCPServerConfig {
   url: string;
-  type: 'httpOrSse' | 'stdio';
+  type: 'sse' | 'stdio';
   command?: string;
   args?: string[];
   env?: KeyValuePair[];
@@ -44,6 +44,7 @@ export async function initializeMCPClients(
       // All servers are handled as HTTP or SSE
       // SSE is only when URL ends with /sse
       // which is the heuristic used by other clients
+
       const transport = mcpServer.url.endsWith('/sse')
         ? {
             type: 'sse' as const,
