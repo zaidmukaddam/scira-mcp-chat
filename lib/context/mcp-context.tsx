@@ -17,7 +17,7 @@ export interface MCPServer {
   id: string;
   name: string;
   url: string;
-  type: 'sse' | 'stdio';
+  type: 'httpOrSse' | 'stdio';
   command?: string;
   args?: string[];
   env?: KeyValuePair[];
@@ -30,7 +30,7 @@ export interface MCPServer {
 
 // Type for processed MCP server config for API
 export interface MCPServerApi {
-  type: 'sse';
+  type: 'httpOrSse';
   url: string;
   headers?: KeyValuePair[];
 }
@@ -135,7 +135,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
       .map(id => getServerById(id))
       .filter((server): server is MCPServer => !!server && server.status === 'connected')
       .map(server => ({
-        type: 'sse',
+        type: 'httpOrSse',
         url: server.type === 'stdio' && server.sandboxUrl ? server.sandboxUrl : server.url,
         headers: server.headers
       }));
@@ -150,8 +150,8 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     updateServerStatus(serverId, 'connecting');
     
     try {
-      // For SSE servers, just check if the endpoint is available
-      if (server.type === 'sse') {
+      // For HTTP or SSE servers, just check if the endpoint is available
+      if (server.type === 'httpOrSse') {
         const isReady = await waitForServerReady(server.url);
         updateServerStatus(serverId, isReady ? 'connected' : 'error', 
           isReady ? undefined : 'Could not connect to server');
