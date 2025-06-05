@@ -150,7 +150,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     updateServerStatus(serverId, 'connecting');
     
     try {
-      // For SSE servers, just check if the endpoint is available
+      // For HTTP or SSE servers, just check if the endpoint is available
       if (server.type === 'sse') {
         const isReady = await waitForServerReady(server.url);
         updateServerStatus(serverId, isReady ? 'connected' : 'error', 

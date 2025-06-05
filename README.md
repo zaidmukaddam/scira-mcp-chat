@@ -17,7 +17,7 @@
 
 - Streaming text responses powered by the [AI SDK by Vercel](https://sdk.vercel.ai/docs), allowing multiple AI providers to be used interchangeably with just a few lines of code.
 - Full integration with [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers to expand available tools and capabilities.
-- Multiple MCP transport types (SSE and stdio) for connecting to various tool providers.
+- Multiple MCP transport types (HTTP, SSE and stdio) for connecting to various tool providers.
 - Built-in tool integration for extending AI capabilities.
 - Reasoning model support.
 - [shadcn/ui](https://ui.shadcn.com/) components for a modern, responsive UI powered by [Tailwind CSS](https://tailwindcss.com).
@@ -32,13 +32,13 @@ This application supports connecting to Model Context Protocol (MCP) servers to 
 1. Click the settings icon (⚙️) next to the model selector in the chat interface.
 2. Enter a name for your MCP server.
 3. Select the transport type:
-   - **SSE (Server-Sent Events)**: For HTTP-based remote servers
+   - **HTTP or SSE (Server-Sent Events)**: For HTTP-based remote servers
    - **stdio (Standard I/O)**: For local servers running on the same machine
 
-#### SSE Configuration
+#### HTTP or SSE Configuration
 
-If you select SSE transport:
-1. Enter the server URL (e.g., `https://mcp.example.com/token/sse`)
+If you select HTTP / SSE transport:
+1. Enter the server URL (e.g., `https://mcp.example.com/mcp` or `https://mcp.example.com/token/sse`)
 2. Click "Add Server"
 
 #### stdio Configuration
@@ -57,6 +57,7 @@ You can use any MCP-compatible server with this application. Here are some examp
 
 - [Composio](https://composio.dev/mcp) - Provides search, code interpreter, and other tools
 - [Zapier MCP](https://zapier.com/mcp) - Provides access to Zapier tools
+- [Hugging Face MCP](https://huggingface.co/mcp) - Provides tool access to Hugging Face Hub
 - Any MCP server using stdio transport with npx and python3
 
 ## License

@@ -21,6 +21,7 @@
     "@ai-sdk/xai": "^1.2.16",
     "@aws-sdk/client-s3": "^3.821.0",
     "@daytonaio/sdk": "^0.19.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@neondatabase/serverless": "^1.0.0",
     "@radix-ui/react-accordion": "^1.2.7",
     "@radix-ui/react-avatar": "^1.1.6",
