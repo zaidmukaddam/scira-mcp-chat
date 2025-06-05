@@ -605,7 +605,7 @@ export const MCPServerManager = ({
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                                                                {server.type.toUpperCase()}
+                                                                {server.type === "stdio" ? "STDIO" : server.url?.endsWith("/sse") ? "SSE" : "HTTP"}
                                                             </span>
                                                             
                                                             {/* Status indicator */}
