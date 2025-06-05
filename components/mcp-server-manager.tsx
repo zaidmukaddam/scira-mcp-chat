@@ -739,7 +739,7 @@ export const MCPServerManager = ({
                                             <Globe className={`h-5 w-5 shrink-0 ${newServer.type === 'sse' ? 'text-primary' : ''}`} />
                                             <div>
                                                 <p className="font-medium">HTTP / SSE</p>
-                                                <p className="text-xs text-muted-foreground">Server-Sent Events</p>
+                                                <p className="text-xs text-muted-foreground">Remote Server</p>
                                             </div>
                                         </button>
                                         
