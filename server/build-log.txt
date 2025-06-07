@@ -1,0 +1,3 @@
+
+> server@1.0.0 build
+> ./node_modules/.bin/tsc

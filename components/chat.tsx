@@ -1,4 +1,5 @@
 "use client";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
 import { defaultModel, type modelID } from "@/ai/providers";
 import { Message, useChat } from "@ai-sdk/react";
@@ -103,7 +104,8 @@ export default function Chat() {
   }, [chatData]);
   
   const { messages, input, handleInputChange, handleSubmit, status, stop } =
-    useChat({
+
+    api: `http://localhost:3001/api/chat`,
       id: chatId || generatedChatId, // Use generated ID if no chatId in URL
       initialMessages,
       maxSteps: 20,

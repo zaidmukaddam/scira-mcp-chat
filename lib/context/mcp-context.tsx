@@ -1,9 +1,11 @@
 "use client";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 import React, { createContext, useContext, useRef } from "react";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
-import { startSandbox, stopSandbox } from "@/app/actions";
+
 
 // Define types for MCP server
 export interface KeyValuePair {
@@ -181,12 +183,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
         }
         
         // Create a new sandbox
-        const { url } = await startSandbox({
-          id: serverId,
-          command: server.command,
-          args: server.args,
-          env: server.env,
-        });
+        const response = await fetch(`http://localhost:3001/api/sandbox/start`, {      method: "POST",      headers: { "Content-Type": "application/json" },      body: JSON.stringify()    });    if (!response.ok) {      const errorData = await response.json().catch(() => ({ message: "Failed to start sandbox and parse error response" }));      throw new Error(errorData.message || `Failed to start sandbox: ${response.status}`);    }    const { url } = await response.json();
         
         // Wait for the server to become ready
         const isReady = await waitForServerReady(url);
@@ -205,7 +202,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
           
           // Clean up sandbox
           try {
-            await stopSandbox(serverId);
+            const response = await fetch(`http://localhost:3001/api/sandbox/stop`, {      method: "POST",      headers: { "Content-Type": "application/json" },      body: JSON.stringify({ id:  })    });    if (!response.ok) {      const errorData = await response.json().catch(() => ({ message: "Failed to stop sandbox and parse error response" }));      throw new Error(errorData.message || `Failed to stop sandbox: ${response.status}`);    }    await response.json();
           } catch (error) {
             console.error(`Failed to stop non-responsive sandbox ${serverId}:`, error);
           }
@@ -282,4 +279,4 @@ export function useMCP() {
     throw new Error("useMCP must be used within an MCPProvider");
   }
   return context;
-} 
+}
