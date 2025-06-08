@@ -52,7 +52,8 @@ const INITIAL_NEW_SERVER: Omit<MCPServer, 'id'> = {
     command: 'node',
     args: [],
     env: [],
-    headers: []
+    headers: [],
+    autoStart: false
 };
 
 interface MCPServerManagerProps {
@@ -200,7 +201,13 @@ export const MCPServerManager = ({
         }
 
         const id = crypto.randomUUID();
-        const updatedServers = [...servers, { ...newServer, id }];
+        const serverToAdd: MCPServer = {
+            ...newServer,
+            id,
+            // Ensure autoStart is false if not stdio, otherwise use its value
+            autoStart: newServer.type === 'stdio' ? !!newServer.autoStart : false,
+        };
+        const updatedServers = [...servers, serverToAdd];
         onServersChange(updatedServers);
 
         toast.success(`Added MCP server: ${newServer.name}`);
@@ -403,7 +410,8 @@ export const MCPServerManager = ({
             command: server.command,
             args: server.args,
             env: server.env,
-            headers: server.headers
+            headers: server.headers,
+            autoStart: !!server.autoStart // Ensure autoStart is populated when editing
         });
         setView('add');
         // Reset sensitive value visibility states
@@ -440,8 +448,15 @@ export const MCPServerManager = ({
             toast.error("Command and at least one argument are required for stdio transport");
             return;
         }
+
+        const serverToUpdate: MCPServer = {
+            ...newServer,
+            id: editingServerId!,
+            // Ensure autoStart is false if not stdio, otherwise use its value
+            autoStart: newServer.type === 'stdio' ? !!newServer.autoStart : false,
+        };
         const updated = servers.map(s =>
-            s.id === editingServerId ? { ...newServer, id: editingServerId! } : s
+            s.id === editingServerId ? serverToUpdate : s
         );
         onServersChange(updated);
         toast.success(`Updated MCP server: ${newServer.name}`);
@@ -809,6 +824,17 @@ export const MCPServerManager = ({
                                         <p className="text-xs text-muted-foreground">
                                             Space-separated arguments or JSON array
                                         </p>
+                                    </div>
+                                    {/* Auto-start checkbox for stdio servers */}
+                                    <div className="flex items-center space-x-2 mt-2">
+                                        <Checkbox
+                                            id="autoStart"
+                                            checked={!!newServer.autoStart}
+                                            onCheckedChange={(checked) => setNewServer({ ...newServer, autoStart: !!checked })}
+                                        />
+                                        <Label htmlFor="autoStart" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Automatically start this server on load
+                                        </Label>
                                     </div>
                                 </>
                             )}
