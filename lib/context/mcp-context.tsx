@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef, useEffect } from "react";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { startSandbox, stopSandbox } from "@/app/actions";
@@ -26,6 +26,7 @@ export interface MCPServer {
   status?: ServerStatus;
   errorMessage?: string;
   sandboxUrl?: string; // Store the sandbox URL directly on the server object
+  autoStart?: boolean;
 }
 
 // Type for processed MCP server config for API
@@ -256,6 +257,26 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
   
   // Calculate mcpServersForApi based on current state
   const mcpServersForApi = getActiveServersForApi();
+
+  // Effect to auto-start stdio servers
+  useEffect(() => {
+    console.log("MCPProvider mounted, checking for auto-start servers...");
+    mcpServers.forEach(server => {
+      if (server.type === 'stdio' && server.autoStart === true) {
+        // Check if the server is not already connected or connecting
+        if (server.status !== 'connected' && server.status !== 'connecting') {
+          console.log(`Auto-starting server: ${server.name} (ID: ${server.id})`);
+          startServer(server.id).catch(error => {
+            console.error(`Error auto-starting server ${server.id}:`, error);
+            // Optionally update status to error here if startServer doesn't handle it
+          });
+        } else {
+          console.log(`Server ${server.name} (ID: ${server.id}) already connected or connecting, skipping auto-start.`);
+        }
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mcpServers, startServer]); // Add mcpServers and startServer to dependency array
 
   return (
     <MCPContext.Provider 
