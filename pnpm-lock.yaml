@@ -32,6 +32,12 @@ importers:
       '@daytonaio/sdk':
         specifier: ^0.19.0
         version: 0.19.0(@babel/core@7.27.4)(typescript@5.8.3)
+      '@mcp-ui/client':
+        specifier: ^2.2.0
+        version: 2.2.0
+      '@mcp-ui/server':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@neondatabase/serverless':
         specifier: ^1.0.0
         version: 1.0.0
