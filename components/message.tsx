@@ -1,11 +1,12 @@
 "use client";
 
 import type { Message as TMessage } from "ai";
+import type { UseChatHelpers } from "@ai-sdk/react";
 import { memo, useCallback, useEffect, useState } from "react";
 import equal from "fast-deep-equal";
 import { Markdown } from "./markdown";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon, BrainIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon } from "lucide-react";
 import { SpinnerIcon } from "./icons";
 import { ToolInvocation } from "./tool-invocation";
 import { CopyButton } from "./copy-button";
@@ -49,7 +50,7 @@ export function ReasoningMessagePart({
           <div className="text-xs font-medium tracking-tight">Thinking...</div>
         </div>
       ) : (
-        <button 
+        <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
             "flex items-center justify-between w-full",
@@ -120,13 +121,14 @@ const PurePreviewMessage = ({
   message,
   isLatestMessage,
   status,
+  append,
 }: {
   message: TMessage;
   isLoading: boolean;
   status: "error" | "submitted" | "streaming" | "ready";
   isLatestMessage: boolean;
+  append: UseChatHelpers['append'];
 }) => {
-  // Create a string with all text parts for copy functionality
   const getMessageText = () => {
     if (!message.parts) return "";
     return message.parts
@@ -135,7 +137,6 @@ const PurePreviewMessage = ({
       .join("\n\n");
   };
 
-  // Only show copy button if the message is from the assistant and not currently streaming
   const shouldShowCopyButton = message.role === "assistant" && (!isLatestMessage || status !== "streaming");
 
   return (
@@ -148,8 +149,8 @@ const PurePreviewMessage = ({
     >
       <div
         className={cn(
-          "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
-          "group-data-[role=user]/message:w-fit",
+          "flex gap-4 w-full",
+          message.role === "user" ? "ml-auto max-w-2xl w-fit" : ""
         )}
       >
         <div className="flex flex-col w-full space-y-3">
@@ -158,7 +159,7 @@ const PurePreviewMessage = ({
               case "text":
                 return (
                   <div
-                    key={`message-${message.id}-part-${i}`}
+                    key={`message-part-${i}`}
                     className="flex flex-row gap-2 items-start w-full"
                   >
                     <div
@@ -177,19 +178,20 @@ const PurePreviewMessage = ({
                 
                 return (
                   <ToolInvocation
-                    key={`message-${message.id}-part-${i}`}
+                    key={`message-part-${i}`}
                     toolName={toolName}
                     state={state}
                     args={args}
                     result={result}
                     isLatestMessage={isLatestMessage}
                     status={status}
+                    append={append}
                   />
                 );
               case "reasoning":
                 return (
                   <ReasoningMessagePart
-                    key={`message-${message.id}-${i}`}
+                    key={`message-${i}`}
                     // @ts-expect-error part
                     part={part}
                     isReasoning={
@@ -219,8 +221,9 @@ export const Message = memo(PurePreviewMessage, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) return false;
   if (prevProps.isLoading !== nextProps.isLoading) return false;
   if (prevProps.isLatestMessage !== nextProps.isLatestMessage) return false;
+  if (prevProps.append !== nextProps.append) return false;
   if (prevProps.message.annotations !== nextProps.message.annotations) return false;
-  if (prevProps.message.id !== nextProps.message.id) return false;
+  // if (prevProps.message.id !== nextProps.message.id) return false;
   if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
   return true;
 });
