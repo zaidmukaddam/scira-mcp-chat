@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getChats } from "@/lib/chat-store";
-import { db} from "@/lib/db/index";
 
 export async function GET(request: Request) {
   try {    
