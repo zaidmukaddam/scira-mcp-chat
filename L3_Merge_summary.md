@@ -68,4 +68,5 @@ const renderedHtmlResources = useMemo(() => {
       onUiAction={handleUiAction}
     />
   );
+// ..
 }, [htmlResourceContents, resourceStyle, handleUiAction]);
