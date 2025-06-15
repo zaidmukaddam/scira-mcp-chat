@@ -45,7 +45,8 @@ These utilities and components were imported in various parts of the codebase:
 
 ## Challenges Faced During `ToolInvocation.tsx` Integration
 
-Despite successfully creating the utilities, rendering returned content using `HTMLResourceRenderer` inside `ToolInvocation.tsx` did not work as expected. After multiple iterations of trial and error, I referred to the `scira-mcp-ui-chat` repository to understand the proper iframe rendering structure.
+Despite successfully creating the utilities, rendering returned content using `HTMLResourceRenderer` inside `ToolInvocation.tsx` did not work as expected. After multiple iterations of trial and error, I referred to the `scira-mcp-ui-chat` repository to understand the proper iframe rendering structure. 
+Taking inspiration from it the dependancy of `HTMLResourceRenderer` has be removed and implemented directly inside `ToolInvocation.tsx` to make things simpler and modified in order to make it work with the changed iframe rendering structure.
 
 ### Key Rendering Structure:
 
