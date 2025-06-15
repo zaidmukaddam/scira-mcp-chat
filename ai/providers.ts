@@ -1,3 +1,6 @@
+// File provides the set of AI models available for use in the application.
+// Handles the initialization of AI providers, API keys, and model metadata.
+
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGroq } from "@ai-sdk/groq";
 import { createAnthropic } from "@ai-sdk/anthropic";
@@ -25,14 +28,18 @@ const middleware = extractReasoningMiddleware({
 const getApiKey = (key: string): string | undefined => {
   // Check for environment variables first
   if (process.env[key]) {
+    console.log(`Found ${key} in environment variables`);
     return process.env[key] || undefined;
   }
   
   // Fall back to localStorage if available
   if (typeof window !== 'undefined') {
-    return window.localStorage.getItem(key) || undefined;
+    const value = window.localStorage.getItem(key);
+    console.log(`${key} in localStorage: ${value ? 'found' : 'not found'}`);
+    return value || undefined;
   }
   
+  console.log(`${key} not found in env vars or localStorage`);
   return undefined;
 };
 
@@ -45,9 +52,16 @@ const anthropicClient = createAnthropic({
   apiKey: getApiKey('ANTHROPIC_API_KEY'),
 });
 
-const groqClient = createGroq({
-  apiKey: getApiKey('GROQ_API_KEY'),
-});
+// Initialize with proper error handling
+const groqClient = (() => {
+  const apiKey = getApiKey('GROQ_API_KEY');
+  if (!apiKey) {
+    console.warn('Groq API key not found, some features may be unavailable');
+  }
+  return createGroq({
+    apiKey: apiKey,
+  });
+})();
 
 const xaiClient = createXai({
   apiKey: getApiKey('XAI_API_KEY'),
