@@ -71,6 +71,7 @@ export const ToolInvocation = memo(function ToolInvocation({
   const [isExpanded, setIsExpanded] = useState(false);
   const [htmlResourceContents, setHtmlResourceContents] = useState<HtmlResourceData[]>([]);
 
+  
   // Function to convert URL to a compatible resource object
   const createExternalUrlResource = (url: string): HtmlResourceData => {
     return {
@@ -239,8 +240,12 @@ export const ToolInvocation = memo(function ToolInvocation({
 
   const resourceStyle = useMemo(() => ({ minHeight: 425 }), []);
 
-  const handleUiAction = useCallback(async (toolCallName: string, toolCallParams: any) => {
-    if (append) {
+  // Update signature to match expected (result: UiActionResult, ...args: any[])
+  const handleUiAction = useCallback(async (result: any, ...args: any[]) => {
+    // Assume result contains toolCallName and toolCallParams
+    const toolCallName = result?.toolCallName;
+    const toolCallParams = result?.toolCallParams;
+    if (append && toolCallName) {
       const userMessageContent = `Call ${toolCallName} with parameters: ${JSON.stringify(toolCallParams)}`;
       
       const newMessage: TMessage = {
