@@ -44,17 +44,11 @@ export async function initializeMCPClients(
       // SSE is only when URL ends with /sse
       // which is the heuristic used by other clients
 
-      const transport = mcpServer.url.endsWith('/sse')
-        ? {
-            type: 'sse' as const,
-            url: mcpServer.url,
-            headers,
-          }
-        : {
-            type: 'http' as const,
-            url: mcpServer.url,
-            headers,
-          };
+      const transport = {
+        type: 'sse' as const,
+        url: mcpServer.url,
+        headers,
+      };
 
       const mcpClient = await createMCPClient({ transport });
       mcpClients.push(mcpClient);
