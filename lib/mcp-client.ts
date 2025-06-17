@@ -1,5 +1,4 @@
 import { experimental_createMCPClient as createMCPClient } from 'ai';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
 export interface KeyValuePair {
   key: string;
@@ -45,17 +44,11 @@ export async function initializeMCPClients(
       // SSE is only when URL ends with /sse
       // which is the heuristic used by other clients
 
-      const transport = mcpServer.url.endsWith('/sse')
-        ? {
-            type: 'sse' as const,
-            url: mcpServer.url,
-            headers,
-          }
-        : new StreamableHTTPClientTransport(new URL(mcpServer.url), {
-            requestInit: {
-              headers,
-            },
-          });
+      const transport = {
+        type: 'sse' as const,
+        url: mcpServer.url,
+        headers,
+      };
 
       const mcpClient = await createMCPClient({ transport });
       mcpClients.push(mcpClient);
@@ -95,4 +88,4 @@ async function cleanupMCPClients(clients: any[]): Promise<void> {
       console.error("Error closing MCP client:", error);
     }
   }
-} 
+}

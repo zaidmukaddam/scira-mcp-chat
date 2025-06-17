@@ -1,3 +1,7 @@
+// Responsible to manage the MCP server context, 
+// // including starting/stopping servers, storing server configurations, 
+// // and providing server status updates.
+
 "use client";
 
 import React, { createContext, useContext, useRef } from "react";
@@ -282,4 +286,9 @@ export function useMCP() {
     throw new Error("useMCP must be used within an MCPProvider");
   }
   return context;
-} 
+}
+
+// Check if a URL is a visualization URL
+const isVisualizationUrl = (url: string): boolean => {
+  return !!url.match(/charts\.composio\.dev|visualize\.huggingface\.co|plotly\.|datawrapper\.|flourish\.|tableau\.|accuweather\.|weather\.com|openweathermap\.org|weatherapi\.com/i);
+};
