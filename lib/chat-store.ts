@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "./db/index";
 import { chats, messages, type Chat, type Message, MessageRole, type MessagePart, type DBMessage } from "./db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
