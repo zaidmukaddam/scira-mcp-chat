@@ -85,12 +85,23 @@ async function waitForServerReady(url: string, maxAttempts = 20, timeout = 3000)
 export function MCPProvider({ children }: { children: React.ReactNode }) {
   const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
     STORAGE_KEYS.MCP_SERVERS, 
-    []
+    [
+      // Add the default server configuration here
+      {
+        id: "default-json-processor",
+        name: "Structure Processor",
+        url: "http://localhost:3003/sse", // URL to your server-json.py
+        type: "sse",
+        description: "Processes and formats JSON and other structured data",
+        status: "disconnected",
+        headers: []
+      }
+    ]
   );
   
   const [selectedMcpServers, setSelectedMcpServers] = useLocalStorage<string[]>(
     STORAGE_KEYS.SELECTED_MCP_SERVERS, 
-    []
+    ["default-json-processor"] // Pre-select the server
   );
   
   // Create a ref to track active servers and avoid unnecessary re-renders

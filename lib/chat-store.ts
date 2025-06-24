@@ -255,29 +255,47 @@ export async function getChats(userId: string) {
 
 
 export async function getChatById(id: string, userId: string): Promise<ChatWithMessages | null> {
-  const chat = await db
-    .select()
-    .from(chats)
-    .where(
-      and(
-        eq(chats.id, id),
-        eq(chats.userId, userId)
-      )
-    )
-    .then(results => results[0]);
-
-  if (!chat) return null;
-
-  const chatMessages = await db
-    .select()
-    .from(messages)
-    .where(eq(messages.chatId, id))
-    .orderBy(messages.createdAt);
-
-  return {
-    ...chat,
-    messages: chatMessages
-  };
+  console.log(`[DEBUG] getChatById - Fetching chat: ${id} for user: ${userId}`);
+  
+  try {
+    // First get the chat
+    const chatResult = await db
+      .select()
+      .from(chats)
+      .where(
+        and(
+          eq(chats.id, id),
+          eq(chats.userId, userId)
+        )
+      );
+    
+    console.log(`[DEBUG] getChatById - Chat query result length:`, chatResult.length);
+    
+    if (!chatResult.length) {
+      console.log(`[DEBUG] getChatById - No chat found with ID: ${id}`);
+      return null;
+    }
+    
+    const chat = chatResult[0];
+    
+    // Then get all messages for the chat
+    const messagesResult = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.chatId, id))
+      .orderBy(messages.createdAt);
+    
+    console.log(`[DEBUG] getChatById - Messages found: ${messagesResult.length}`);
+    
+    // Return combined result
+    return {
+      ...chat,
+      messages: messagesResult
+    };
+  } catch (error) {
+    console.error(`[DEBUG] getChatById - Database error:`, error);
+    throw error;
+  }
 }
 
 export async function deleteChat(id: string, userId: string) {
