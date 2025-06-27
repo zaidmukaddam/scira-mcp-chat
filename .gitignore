@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,6 +10,8 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+package-lock.json
+**/package-lock.json
 
 # testing
 /coverage

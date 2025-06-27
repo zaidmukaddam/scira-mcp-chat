@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "./db/index";
 import { chats, messages, type Chat, type Message, MessageRole, type MessagePart, type DBMessage } from "./db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -193,12 +193,17 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
   }
 
   // Check if chat already exists
-  const existingChat = await db.query.chats.findFirst({
-    where: and(
-      eq(chats.id, chatId),
-      eq(chats.userId, userId)
-    ),
-  });
+  const existingChat = await db
+    .select()
+    .from(chats)
+    .where(
+      and(
+        eq(chats.id, chatId),
+        eq(chats.userId, userId)
+      )
+    )
+    .then(results => results[0]);
+
 
   if (existingChat) {
     // Update existing chat
@@ -241,31 +246,56 @@ export function getTextContent(message: Message): string {
 }
 
 export async function getChats(userId: string) {
-  return await db.query.chats.findMany({
-    where: eq(chats.userId, userId),
-    orderBy: [desc(chats.updatedAt)]
-  });
+  return await db
+    .select()
+    .from(chats)
+    .where(eq(chats.userId, userId))
+    .orderBy(desc(chats.updatedAt));
 }
 
+
 export async function getChatById(id: string, userId: string): Promise<ChatWithMessages | null> {
-  const chat = await db.query.chats.findFirst({
-    where: and(
-      eq(chats.id, id),
-      eq(chats.userId, userId)
-    ),
-  });
-
-  if (!chat) return null;
-
-  const chatMessages = await db.query.messages.findMany({
-    where: eq(messages.chatId, id),
-    orderBy: [messages.createdAt]
-  });
-
-  return {
-    ...chat,
-    messages: chatMessages
-  };
+  console.log(`[DEBUG] getChatById - Fetching chat: ${id} for user: ${userId}`);
+  
+  try {
+    // First get the chat
+    const chatResult = await db
+      .select()
+      .from(chats)
+      .where(
+        and(
+          eq(chats.id, id),
+          eq(chats.userId, userId)
+        )
+      );
+    
+    console.log(`[DEBUG] getChatById - Chat query result length:`, chatResult.length);
+    
+    if (!chatResult.length) {
+      console.log(`[DEBUG] getChatById - No chat found with ID: ${id}`);
+      return null;
+    }
+    
+    const chat = chatResult[0];
+    
+    // Then get all messages for the chat
+    const messagesResult = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.chatId, id))
+      .orderBy(messages.createdAt);
+    
+    console.log(`[DEBUG] getChatById - Messages found: ${messagesResult.length}`);
+    
+    // Return combined result
+    return {
+      ...chat,
+      messages: messagesResult
+    };
+  } catch (error) {
+    console.error(`[DEBUG] getChatById - Database error:`, error);
+    throw error;
+  }
 }
 
 export async function deleteChat(id: string, userId: string) {
@@ -275,4 +305,4 @@ export async function deleteChat(id: string, userId: string) {
       eq(chats.userId, userId)
     )
   );
-} 
+}

@@ -1,3 +1,7 @@
+// Responsible to manage the MCP server context, 
+// // including starting/stopping servers, storing server configurations, 
+// // and providing server status updates.
+
 "use client";
 
 import React, { createContext, useContext, useRef } from "react";
@@ -81,12 +85,23 @@ async function waitForServerReady(url: string, maxAttempts = 20, timeout = 3000)
 export function MCPProvider({ children }: { children: React.ReactNode }) {
   const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
     STORAGE_KEYS.MCP_SERVERS, 
-    []
+    [
+      // Add the default server configuration here
+      {
+        id: "default-json-processor",
+        name: "Structure Processor",
+        url: "http://localhost:5173/sse", // URL to match route.ts default server
+        type: "sse",
+        description: "Processes and formats JSON and other structured data",
+        status: "disconnected",
+        headers: []
+      }
+    ]
   );
   
   const [selectedMcpServers, setSelectedMcpServers] = useLocalStorage<string[]>(
     STORAGE_KEYS.SELECTED_MCP_SERVERS, 
-    []
+    ["default-json-processor"] // Pre-select the server
   );
   
   // Create a ref to track active servers and avoid unnecessary re-renders
@@ -282,4 +297,9 @@ export function useMCP() {
     throw new Error("useMCP must be used within an MCPProvider");
   }
   return context;
-} 
+}
+
+// Check if a URL is a visualization URL
+const isVisualizationUrl = (url: string): boolean => {
+  return !!url.match(/charts\.composio\.dev|visualize\.huggingface\.co|plotly\.|datawrapper\.|flourish\.|tableau\.|accuweather\.|weather\.com|openweathermap\.org|weatherapi\.com/i);
+};
