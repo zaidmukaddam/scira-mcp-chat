@@ -90,7 +90,7 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
       {
         id: "default-json-processor",
         name: "Structure Processor",
-        url: "http://localhost:3003/sse", // URL to your server-json.py
+        url: "http://localhost:5173/sse", // URL to match route.ts default server
         type: "sse",
         description: "Processes and formats JSON and other structured data",
         status: "disconnected",

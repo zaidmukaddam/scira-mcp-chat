@@ -8,7 +8,7 @@ interface Params {
 }
 
 export async function GET(request: Request, { params }: Params) {
-  const { id } = params; // Extract id first
+  const { id } = await params; // Extract id first - await params to fix Next.js error
   console.log(`[DEBUG] GET /api/chats/${id} - Request received`);
   console.log(`[DEBUG] Headers:`, Object.fromEntries([...request.headers.entries()]));
   
@@ -64,3 +64,6 @@ export async function DELETE(request: Request, { params }: Params) {
     );
   }
 }
+
+
+

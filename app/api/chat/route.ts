@@ -89,23 +89,23 @@ export async function POST(req: Request) {
   }
 
   // Add default server if not already included
-  // const defaultJsonServer = {
-  //   type: 'sse' as const,
-  //   url: 'http://localhost:3003/sse',
-  //   headers: []
-  // };
+  const defaultJsonServer = {
+    type: 'sse' as const,
+    url: 'http://localhost:5173/sse',
+    headers: []
+  };
   
-  // // Check if this server is already in the list
-  // const hasDefaultServer = mcpServers.some(server => 
-  //   server.url === defaultJsonServer.url
-  // );
+  // Check if this server is already in the list
+  const hasDefaultServer = mcpServers.some(server => 
+    server.url === defaultJsonServer.url
+  );
   
-  // // Use the combined list
-  // const allServers = hasDefaultServer ? mcpServers : [...mcpServers, defaultJsonServer];
+  // Use the combined list
+  const allServers = hasDefaultServer ? mcpServers : [...mcpServers, defaultJsonServer];
 
   
   // Initialize MCP clients using only the user-selected servers
-  const { tools, cleanup } = await initializeMCPClients(mcpServers, req.signal);
+  const { tools, cleanup } = await initializeMCPClients(allServers, req.signal);
 
   
   console.log("messages", messages);
@@ -132,14 +132,10 @@ export async function POST(req: Request) {
     You can run multiple steps using all the tools!!!!
     Make sure to use the right tool to respond to the user's question.
 
-    For any questions related to financial data, stock information, company metrics, market analysis, or corporate financial reports, use the second Python server to fetch this information.
-    Any kind of question related to the finalcial analysis should go to the second Python server. 
-
     Multiple tools can be used in a single response and multiple steps can be used to answer the user's question.
 
     ## Response Format
     - Markdown is supported.
-    - Respond according to tool's response. The python server is capable of returning Displayable iFrames JSON HTML structure, so use that to format the response.
     - Use the tools to answer the user's question.
     - If you don't know the answer, use the tools to find the answer or say you don't know.
     - It is encouraged to use the tools to answer the user's question.
