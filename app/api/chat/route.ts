@@ -95,21 +95,43 @@ export async function POST(req: Request) {
     headers: []
   };
   
+  console.log("Received mcpServers from client:", mcpServers);
+  
+  // Filter out unwanted servers - only allow known good servers
+  const allowedServers = mcpServers.filter(server => {
+    const isAllowedUrl = server.url === 'http://localhost:5173/sse' || 
+                        server.url.startsWith('http://localhost:5173/') ||
+                        !server.url.includes('localhost:3003'); // Explicitly block 3003
+    
+    if (!isAllowedUrl) {
+      console.log(`Blocking server: ${server.url} - not in allowed list`);
+    }
+    
+    return isAllowedUrl;
+  });
+  
+  console.log("Filtered mcpServers:", allowedServers);
+  
   // Check if this server is already in the list
-  const hasDefaultServer = mcpServers.some(server => 
+  const hasDefaultServer = allowedServers.some(server => 
     server.url === defaultJsonServer.url
   );
   
   // Use the combined list
-  const allServers = hasDefaultServer ? mcpServers : [...mcpServers, defaultJsonServer];
+  const allServers = hasDefaultServer ? allowedServers : [...allowedServers, defaultJsonServer];
+  
+  console.log("Final server list:", allServers);
 
   
   // Initialize MCP clients using only the user-selected servers
   const { tools, cleanup } = await initializeMCPClients(allServers, req.signal);
 
+  // Debug logging for tools
+  console.log("Available tools:", Object.keys(tools));
+  console.log("Messages count:", messages.length);
   
-  console.log("messages", messages);
-  console.log("parts", messages.map(m => m.parts.map(p => p)));
+  // Validate tools before using them
+  const validTools = Object.keys(tools).length > 0 ? tools : undefined;
   
   
   // Track if the response has completed
@@ -141,7 +163,7 @@ export async function POST(req: Request) {
     - It is encouraged to use the tools to answer the user's question.
     `,
     messages,
-    tools,
+    tools: validTools,
     maxSteps: 20,
     providerOptions: {
       google: {
@@ -161,7 +183,16 @@ export async function POST(req: Request) {
       chunking: 'line', // optional: defaults to 'word'
     }),
     onError: (error) => {
-      console.error(JSON.stringify(error, null, 2));
+      console.error("StreamText error occurred:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          cause: error.cause
+        });
+      }
+      console.error("Full error object:", JSON.stringify(error, null, 2));
     },
     async onFinish({ response }) {
       responseCompleted = true;
@@ -205,13 +236,21 @@ export async function POST(req: Request) {
       'X-Chat-ID': id
     },
     getErrorMessage: (error) => {
+      console.error("Response error occurred:", error);
+      
       if (error instanceof Error) {
         if (error.message.includes("Rate limit")) {
           return "Rate limit exceeded. Please try again later.";
         }
+        if (error.message.includes("Failed to call a function")) {
+          return "There was an issue with tool execution. The tools may be temporarily unavailable.";
+        }
+        if (error.message.includes("invalid_request_error")) {
+          return "Invalid request. Please try rephrasing your message.";
+        }
       }
-      console.error(error);
-      return "An error occurred.";
+      console.error("Unhandled error:", error);
+      return "An error occurred while processing your request.";
     },
   });
 }

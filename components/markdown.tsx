@@ -202,6 +202,22 @@ const components: Partial<Components> = {
   hr: ({ node, ...props }) => (
     <hr className="my-1.5 border-zinc-200 dark:border-zinc-700 black:border-zinc-700" {...props} />
   ),
+  img: ({ node, src, alt, ...props }) => {
+    // Don't render image if src is empty or undefined
+    if (!src || (typeof src === 'string' && src.trim() === '')) {
+      return null;
+    }
+    
+    return (
+      <img
+        src={src}
+        alt={alt || ''}
+        className="max-w-full h-auto rounded-lg my-2"
+        loading="lazy"
+        {...props}
+      />
+    );
+  },
 };
 
 const remarkPlugins = [remarkGfm];
