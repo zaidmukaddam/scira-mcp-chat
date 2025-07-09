@@ -133,12 +133,19 @@ export async function POST(req: Request) {
   // Validate tools before using them
   const validTools = Object.keys(tools).length > 0 ? tools : undefined;
   
+  // Validate the selected model - fallback to default if model doesn't exist
+  const { MODELS, defaultModel } = await import('@/ai/providers');
+  const validSelectedModel = MODELS.includes(selectedModel) ? selectedModel : defaultModel;
+  
+  if (selectedModel !== validSelectedModel) {
+    console.log(`Invalid model '${selectedModel}' requested, falling back to '${validSelectedModel}'`);
+  }
   
   // Track if the response has completed
   let responseCompleted = false;
 
   const result = streamText({
-    model: model.languageModel(selectedModel),
+    model: model.languageModel(validSelectedModel),
     system: `You are a helpful assistant with access to a variety of tools.
 
     Today's date is ${new Date().toISOString().split('T')[0]}.

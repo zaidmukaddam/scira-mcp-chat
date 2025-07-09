@@ -37,6 +37,9 @@ yarn-error.log*
 .env.local
 .env
 
+# Firebase config (contains sensitive API keys)
+lib/firebase/config.ts
+
 # vercel
 .vercel
 
