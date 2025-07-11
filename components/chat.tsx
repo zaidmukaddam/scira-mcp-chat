@@ -15,6 +15,7 @@ import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
 import { useMCP } from "@/lib/context/mcp-context";
+import { useAuth } from "@/lib/context/auth-context";
 
 // Type for chat data from DB
 interface ChatData {
@@ -29,6 +30,7 @@ export default function Chat() {
   const params = useParams();
   const chatId = params?.id as string | undefined;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   const [selectedModel, setSelectedModel] = useLocalStorage<modelID>("selectedModel", defaultModel);
   const [userId, setUserId] = useState<string>('');
@@ -37,10 +39,14 @@ export default function Chat() {
   // Get MCP server data from context
   const { mcpServersForApi } = useMCP();
   
-  // Initialize userId
+  // Initialize userId - use Firebase UID if available, otherwise local ID
   useEffect(() => {
-    setUserId(getUserId());
-  }, []);
+    if (user?.uid) {
+      setUserId(user.uid);
+    } else {
+      setUserId(getUserId());
+    }
+  }, [user]);
   
   // Generate a chat ID if needed
   useEffect(() => {
@@ -174,7 +180,7 @@ export default function Chat() {
       ) : (
         <>
           <div className="flex-1 overflow-y-auto min-h-0 pb-2">
-            <Messages messages={messages} isLoading={isLoading} status={status} />
+            <Messages messages={messages} isLoading={isLoading} status={status} append={(message, chatRequestOptions) => { handleSubmit(); return Promise.resolve(); }} />
           </div>
           <form
             onSubmit={handleFormSubmit}

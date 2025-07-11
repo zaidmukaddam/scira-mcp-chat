@@ -6,10 +6,15 @@ export const Messages = ({
   messages,
   isLoading,
   status,
+  append,
 }: {
   messages: TMessage[];
   isLoading: boolean;
   status: "error" | "submitted" | "streaming" | "ready";
+  append: (
+    message: TMessage | any,
+    chatRequestOptions?: any
+  ) => Promise<any>;
 }) => {
   const [containerRef, endRef] = useScrollToBottom();
   
@@ -26,6 +31,7 @@ export const Messages = ({
             isLoading={isLoading}
             message={m}
             status={status}
+            append={append}
           />
         ))}
         <div className="h-1" ref={endRef} />

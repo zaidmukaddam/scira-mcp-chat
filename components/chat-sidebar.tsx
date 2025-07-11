@@ -25,6 +25,7 @@ import Image from "next/image";
 import { MCPServerManager } from "./mcp-server-manager";
 import { ApiKeyManager } from "./api-key-manager";
 import { ThemeToggle } from "./theme-toggle";
+import { UserProfile } from "./user-profile";
 import { getUserId, updateUserId } from "@/lib/user-id";
 import { useChats } from "@/lib/hooks/use-chats";
 import { cn } from "@/lib/utils";
@@ -289,6 +290,11 @@ export function ChatSidebar() {
             
             <SidebarFooter className="p-4 border-t border-border/40 mt-auto">
                 <div className={`flex flex-col ${isCollapsed ? "items-center" : ""} gap-3`}>
+                    {/* User Profile */}
+                    <div className={`flex ${isCollapsed ? "justify-center" : "justify-end"}`}>
+                        <UserProfile />
+                    </div>
+                    
                     <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

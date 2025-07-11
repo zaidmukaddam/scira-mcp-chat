@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,6 +10,8 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+package-lock.json
+**/package-lock.json
 
 # testing
 /coverage
@@ -33,6 +36,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env.local
 .env
+
+# Firebase config (contains sensitive API keys)
+lib/firebase/config.ts
 
 # vercel
 .vercel
