@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { type Chat } from '@/lib/db/schema';
 import { toast } from 'sonner';
 
-export function useChats(userId: string) {
+export function useChats(userId: string, projectId?: string) {
   const queryClient = useQueryClient();
   
   // Main query to fetch chats
@@ -12,11 +12,15 @@ export function useChats(userId: string) {
     error,
     refetch
   } = useQuery<Chat[]>({
-    queryKey: ['chats', userId],
+    queryKey: ['chats', userId, projectId],
     queryFn: async () => {
       if (!userId) return [];
       
-      const response = await fetch('/api/chats', {
+      const url = projectId 
+        ? `/api/chats?projectId=${projectId}`
+        : '/api/chats';
+      
+      const response = await fetch(url, {
         headers: {
           'x-user-id': userId
         }
@@ -51,7 +55,7 @@ export function useChats(userId: string) {
     },
     onSuccess: (deletedChatId) => {
       // Update cache by removing the deleted chat
-      queryClient.setQueryData<Chat[]>(['chats', userId], (oldChats = []) => 
+      queryClient.setQueryData<Chat[]>(['chats', userId, projectId], (oldChats = []) => 
         oldChats.filter(chat => chat.id !== deletedChatId)
       );
       
@@ -65,7 +69,7 @@ export function useChats(userId: string) {
 
   // Function to invalidate chats cache for refresh
   const refreshChats = () => {
-    queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+    queryClient.invalidateQueries({ queryKey: ['chats', userId, projectId] });
   };
 
   return {

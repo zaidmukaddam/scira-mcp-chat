@@ -74,9 +74,21 @@ const ollamaClient = createOpenAI({
 const languageModels = {
   // "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
   "claude-4-sonnet": anthropicClient('claude-sonnet-4-20250514'),
-  "qwen-qwq": wrapLanguageModel(
+  "llama-3.1-8b": wrapLanguageModel(
     {
-      model: groqClient("qwen-qwq-32b"),
+      model: groqClient("llama-3.1-8b-instant"),
+      middleware
+    }
+  ),
+  "deepseek-r1": wrapLanguageModel(
+    {
+      model: groqClient("deepseek-r1-distill-llama-70b"),
+      middleware
+    }
+  ),
+  "qwen3-32b": wrapLanguageModel(
+    {
+      model: groqClient("qwen/qwen3-32b"),
       middleware
     }
   ),
@@ -124,12 +136,26 @@ export const modelDetails: Record<modelID, ModelInfo> = {
     apiVersion: "claude-4-sonnet-20250514",
     capabilities: ["Reasoning", "Creative", "Coding"]
   },
-  "qwen-qwq": {
+  "llama-3.1-8b": {
     provider: "Groq",
-    name: "Qwen QWQ",
-    description: "Latest version of Alibaba's Qwen QWQ with strong reasoning and coding capabilities.",
-    apiVersion: "qwen-qwq",
-    capabilities: ["Reasoning", "Efficient", "Agentic"]
+    name: "Llama 3.1 8B",
+    description: "Meta's Llama 3.1 8B model with fast inference through Groq.",
+    apiVersion: "llama-3.1-8b-instant",
+    capabilities: ["Fast Inference", "Reasoning", "General Purpose"]
+  },
+  "deepseek-r1": {
+    provider: "Groq",
+    name: "DeepSeek R1 Distill",
+    description: "DeepSeek R1 distilled into Llama 70B for enhanced reasoning capabilities.",
+    apiVersion: "deepseek-r1-distill-llama-70b",
+    capabilities: ["Advanced Reasoning", "Problem Solving", "Large Context"]
+  },
+  "qwen3-32b": {
+    provider: "Groq",
+    name: "Qwen 3 32B",
+    description: "Alibaba's Qwen 3 32B model with excellent performance across various tasks.",
+    apiVersion: "qwen/qwen3-32b",
+    capabilities: ["Multilingual", "Reasoning", "Large Context"]
   },
   "gemini-1.5-pro": {
     provider: "Google",
@@ -188,4 +214,4 @@ export type modelID = keyof typeof languageModels;
 
 export const MODELS = Object.keys(languageModels);
 
-export const defaultModel: modelID = "qwen-qwq";
+export const defaultModel: modelID = "llama-3.1-8b";

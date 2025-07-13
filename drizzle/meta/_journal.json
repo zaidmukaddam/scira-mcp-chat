@@ -43,6 +43,13 @@
       "when": 1745172826749,
       "tag": "0005_early_payback",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1752389880695,
+      "tag": "0006_milky_scrambler",
+      "breakpoints": true
     }
   ]
 }

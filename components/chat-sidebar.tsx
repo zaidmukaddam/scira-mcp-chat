@@ -64,6 +64,7 @@ export function ChatSidebar() {
     const isCollapsed = state === "collapsed";
     const [editUserIdOpen, setEditUserIdOpen] = useState(false);
     const [newUserId, setNewUserId] = useState('');
+    const [currentProjectId, setCurrentProjectId] = useState<string | undefined>();
 
     // Get MCP server data from context
     const { mcpServers, setMcpServers, selectedMcpServers, setSelectedMcpServers } = useMCP();
@@ -73,8 +74,8 @@ export function ChatSidebar() {
         setUserId(getUserId());
     }, []);
     
-    // Use TanStack Query to fetch chats
-    const { chats, isLoading, deleteChat, refreshChats } = useChats(userId);
+    // Use TanStack Query to fetch chats - filtered by project if available
+    const { chats, isLoading, deleteChat, refreshChats } = useChats(userId, currentProjectId);
 
     // Start a new chat
     const handleNewChat = () => {

@@ -24,6 +24,7 @@ type SaveChatParams = {
   userId: string;
   messages?: any[];
   title?: string;
+  projectId?: string;
 };
 
 type ChatWithMessages = Chat & {
@@ -110,7 +111,7 @@ export function convertToUIMessages(dbMessages: Array<Message>): Array<UIMessage
   }));
 }
 
-export async function saveChat({ id, userId, messages: aiMessages, title }: SaveChatParams) {
+export async function saveChat({ id, userId, messages: aiMessages, title, projectId }: SaveChatParams) {
   // Generate a new ID if one wasn't provided
   const chatId = id || nanoid();
   
@@ -211,6 +212,7 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
       .update(chats)
       .set({ 
         title: chatTitle,
+        projectId: projectId || existingChat.projectId,
         updatedAt: new Date() 
       })
       .where(and(
@@ -222,6 +224,7 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
     await db.insert(chats).values({
       id: chatId,
       userId,
+      projectId,
       title: chatTitle,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -245,11 +248,17 @@ export function getTextContent(message: Message): string {
   }
 }
 
-export async function getChats(userId: string) {
+export async function getChats(userId: string, projectId?: string | null) {
+  const conditions = [eq(chats.userId, userId)];
+  
+  if (projectId) {
+    conditions.push(eq(chats.projectId, projectId));
+  }
+  
   return await db
     .select()
     .from(chats)
-    .where(eq(chats.userId, userId))
+    .where(and(...conditions))
     .orderBy(desc(chats.updatedAt));
 }
 

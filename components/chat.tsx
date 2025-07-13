@@ -12,10 +12,13 @@ import { getUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToUIMessages } from "@/lib/chat-store";
-import { type Message as DBMessage } from "@/lib/db/schema";
+import { type Message as DBMessage, type Project, type KnowledgeBase } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
 import { useMCP } from "@/lib/context/mcp-context";
 import { useAuth } from "@/lib/context/auth-context";
+import { ProjectManager } from "./project-manager";
+import { KnowledgeBase as KnowledgeBaseComponent } from "./knowledge-base";
+import { ProjectOverviewWidget } from "./project-overview-widget";
 
 // Type for chat data from DB
 interface ChatData {
@@ -35,6 +38,9 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useLocalStorage<modelID>("selectedModel", defaultModel);
   const [userId, setUserId] = useState<string>('');
   const [generatedChatId, setGeneratedChatId] = useState<string>('');
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [projectKnowledge, setProjectKnowledge] = useState<KnowledgeBase[]>([]);
+  const [showKnowledgeBase, setShowKnowledgeBase] = useState(false);
   
   // Get MCP server data from context
   const { mcpServersForApi } = useMCP();
@@ -47,6 +53,27 @@ export default function Chat() {
       setUserId(getUserId());
     }
   }, [user]);
+  
+  // Fetch project knowledge when project changes
+  useEffect(() => {
+    if (currentProject) {
+      fetchProjectKnowledge();
+    }
+  }, [currentProject]);
+
+  const fetchProjectKnowledge = async () => {
+    if (!currentProject) return;
+    
+    try {
+      const response = await fetch(`/api/knowledge?projectId=${currentProject.id}`);
+      if (response.ok) {
+        const knowledge = await response.json();
+        setProjectKnowledge(knowledge);
+      }
+    } catch (error) {
+      console.error('Error fetching knowledge:', error);
+    }
+  };
   
   // Generate a chat ID if needed
   useEffect(() => {
@@ -118,12 +145,18 @@ export default function Chat() {
         mcpServers: mcpServersForApi,
         chatId: chatId || generatedChatId, // Use generated ID if no chatId in URL
         userId,
+        projectId: currentProject?.id,
+        customInstructions: currentProject?.customInstructions,
+        knowledgeContext: projectKnowledge.map(k => ({
+          fileName: k.fileName,
+          content: k.content.slice(0, 2000), // Truncate for context
+        })),
       },
       experimental_throttle: 500,
       onFinish: () => {
         // Invalidate the chats query to refresh the sidebar
         if (userId) {
-          queryClient.invalidateQueries({ queryKey: ['chats', userId] });
+          queryClient.invalidateQueries({ queryKey: ['chats', userId, currentProject?.id] });
         }
       },
       onError: (error) => {
@@ -159,6 +192,44 @@ export default function Chat() {
 
   return (
     <div className="h-dvh flex flex-col justify-center w-full max-w-[430px] sm:max-w-3xl mx-auto px-4 sm:px-6 py-3">
+      {/* Project Manager */}
+      <div className="mb-4 flex items-center justify-between">
+        <ProjectManager
+          currentProject={currentProject}
+          onProjectChange={setCurrentProject}
+          userId={userId}
+        />
+        {currentProject && (
+          <button
+            onClick={() => setShowKnowledgeBase(!showKnowledgeBase)}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            {showKnowledgeBase ? 'Hide' : 'Show'} Knowledge
+          </button>
+        )}
+      </div>
+
+      {/* Knowledge Base Panel */}
+      {showKnowledgeBase && currentProject && (
+        <div className="mb-4">
+          <KnowledgeBaseComponent
+            projectId={currentProject.id}
+            knowledge={projectKnowledge}
+            onKnowledgeUpdate={fetchProjectKnowledge}
+          />
+        </div>
+      )}
+
+      {/* Project Overview Widget for empty chats */}
+      {messages.length === 0 && !isLoadingChat && currentProject && (
+        <div className="mb-4">
+          <ProjectOverviewWidget
+            project={currentProject}
+            knowledge={projectKnowledge}
+          />
+        </div>
+      )}
+
       {messages.length === 0 && !isLoadingChat ? (
         <div className="max-w-xl mx-auto w-full">
           <ProjectOverview />
