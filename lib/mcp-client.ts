@@ -38,11 +38,7 @@ export async function initializeMCPClients(
         return acc;
       }, {} as Record<string, string>);
 
-      // All servers are handled as HTTP or SSE
-      // SSE is only when URL ends with /sse
-      // which is the heuristic used by other clients
-
-      const transport = mcpServer.url.endsWith('/sse')
+      const transport = mcpServer.type === 'sse'
         ? {
           type: 'sse' as const,
           url: mcpServer.url,

@@ -9,12 +9,7 @@ import { eq, and } from 'drizzle-orm';
 import { initializeMCPClients, type MCPServerConfig } from '@/lib/mcp-client';
 import { generateTitle } from '@/app/actions';
 
-export const runtime = 'nodejs';
-
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 120;
-
-export const dynamic = 'force-dynamic';
+import { checkBotId } from "botid/server";
 
 export async function POST(req: Request) {
   const {
@@ -30,6 +25,15 @@ export async function POST(req: Request) {
     userId: string;
     mcpServers?: MCPServerConfig[];
   } = await req.json();
+
+  const { isBot } = await checkBotId();
+
+  if (isBot) {
+    return new Response(
+      JSON.stringify({ error: "Bot is not allowed to access this endpoint" }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
   if (!userId) {
     return new Response(

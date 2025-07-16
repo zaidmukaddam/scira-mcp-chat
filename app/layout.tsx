@@ -6,21 +6,21 @@ import { Menu } from "lucide-react";
 import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
-import Script from "next/script";
+import { BotIdClient } from "botid/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mcp.scira.ai"),
+  metadataBase: new URL("https://mcpchat.scira.ai"),
   title: "Scira MCP Chat",
   description:
     "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
   openGraph: {
     siteName: "Scira MCP Chat",
-    url: "https://mcp.scira.ai",
+    url: "https://mcpchat.scira.ai",
     images: [
       {
-        url: "https://mcp.scira.ai/opengraph-image.png",
+        url: "https://mcpchat.scira.ai/opengraph-image.png",
         width: 1200,
         height: 630,
       },
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     title: "Scira MCP Chat",
     description:
       "Scira MCP Chat is a minimalistic MCP client with a good feature set.",
-    images: ["https://mcp.scira.ai/twitter-image.png"],
+    images: ["https://mcpchat.scira.ai/twitter-image.png"],
   },
 };
 
@@ -42,6 +42,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <BotIdClient
+          protect={[
+            {
+              path: "/api/chat",
+              method: "POST",
+            },
+            {
+              path: "/api/chats",
+              method: "GET",
+            },
+            {
+              path: "/api/chats/:id",
+              method: "GET",
+            },
+          ]}
+        />
+      </head>
       <body className={`${inter.className}`}>
         <Providers>
           <div className="flex h-dvh w-full">
@@ -59,11 +77,6 @@ export default function RootLayout({
           </div>
         </Providers>
         <Analytics />
-        <Script
-          defer
-          src="https://cloud.umami.is/script.js"
-          data-website-id="1373896a-fb20-4c9d-b718-c723a2471ae5"
-        />
       </body>
     </html>
   );

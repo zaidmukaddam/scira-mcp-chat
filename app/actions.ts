@@ -52,7 +52,7 @@ export async function generateTitle(messages: any[]): Promise<string> {
     }
 
     const { object: titleObject } = await generateObject({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-4.1-nano"),
       schema: z.object({
         title: z.string().describe("A short, descriptive title for the conversation"),
       }),
