@@ -54,7 +54,6 @@ const xaiClient = createXai({
 });
 
 const languageModels = {
-  "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
   "claude-4-sonnet": anthropicClient('claude-4-sonnet-20250514'),
   "qwen-32b": wrapLanguageModel(
     {
@@ -63,15 +62,16 @@ const languageModels = {
     }
   ),
   "grok-3-mini": xaiClient("grok-3-mini-latest"),
+  "kimi-k2": groqClient('moonshotai/kimi-k2-instruct')
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
-  "gpt-4.1-mini": {
-    provider: "OpenAI",
-    name: "GPT-4.1 Mini",
-    description: "Compact version of OpenAI's GPT-4.1 with good balance of capabilities, including vision.",
-    apiVersion: "gpt-4.1-mini",
-    capabilities: ["Balance", "Creative", "Vision"]
+  "kimi-k2": {
+    provider: "Groq",
+    name: "Kimi K2",
+    description: "Latest version of Moonshot AI's Kimi K2 with strong reasoning and coding capabilities.",
+    apiVersion: "kimi-k2-instruct",
+    capabilities: ["Balanced", "Efficient", "Agentic"]
   },
   "claude-4-sonnet": {
     provider: "Anthropic",
