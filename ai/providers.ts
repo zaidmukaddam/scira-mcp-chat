@@ -1,6 +1,4 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { createGroq } from "@ai-sdk/groq";
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { createXai } from "@ai-sdk/xai";
 
 import {
@@ -36,15 +34,6 @@ const getApiKey = (key: string): string | undefined => {
   return undefined;
 };
 
-// Create provider instances with API keys from localStorage
-const openaiClient = createOpenAI({
-  apiKey: getApiKey('OPENAI_API_KEY'),
-});
-
-const anthropicClient = createAnthropic({
-  apiKey: getApiKey('ANTHROPIC_API_KEY'),
-});
-
 const groqClient = createGroq({
   apiKey: getApiKey('GROQ_API_KEY'),
 });
@@ -54,8 +43,7 @@ const xaiClient = createXai({
 });
 
 const languageModels = {
-  "claude-4-sonnet": anthropicClient('claude-4-sonnet-20250514'),
-  "qwen-32b": wrapLanguageModel(
+  "qwen3-32b": wrapLanguageModel(
     {
       model: groqClient('qwen/qwen3-32b'),
       middleware
@@ -73,18 +61,11 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "kimi-k2-instruct",
     capabilities: ["Balanced", "Efficient", "Agentic"]
   },
-  "claude-4-sonnet": {
-    provider: "Anthropic",
-    name: "Claude 4 Sonnet",
-    description: "Latest version of Anthropic's Claude 4 Sonnet with strong reasoning and coding capabilities.",
-    apiVersion: "claude-4-sonnet-20250514",
-    capabilities: ["Reasoning", "Efficient", "Agentic"]
-  },
-  "qwen-32b": {
+  "qwen3-32b": {
     provider: "Groq",
-    name: "Qwen 32B",
+    name: "Qwen 3 32B",
     description: "Latest version of Alibaba's Qwen 32B with strong reasoning and coding capabilities.",
-    apiVersion: "qwen-32b",
+    apiVersion: "qwen3-32b",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
   "grok-3-mini": {
@@ -114,4 +95,4 @@ export type modelID = keyof typeof languageModels;
 
 export const MODELS = Object.keys(languageModels);
 
-  export const defaultModel: modelID = "qwen-32b";
+export const defaultModel: modelID = "kimi-k2";
