@@ -4,15 +4,15 @@ import { checkBotId } from "botid/server";
 
 export async function GET(request: Request) {
   try {
-    const { isBot } = await checkBotId();
+    const { isBot, isGoodBot } = await checkBotId();
 
-    if (isBot) {
+    if (isBot && !isGoodBot) {
       return new Response(
         JSON.stringify({ error: "Bot is not allowed to access this endpoint" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
-    
+
     const userId = request.headers.get('x-user-id');
 
     if (!userId) {
