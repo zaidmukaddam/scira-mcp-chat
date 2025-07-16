@@ -10,15 +10,6 @@ interface Params {
 
 export async function GET(request: Request, { params }: Params) {
   try {
-    const { isBot, isGoodBot } = await checkBotId();
-
-    if (isBot && !isGoodBot) {
-      return new Response(
-        JSON.stringify({ error: "Bot is not allowed to access this endpoint" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
     const userId = request.headers.get('x-user-id');
 
     if (!userId) {
