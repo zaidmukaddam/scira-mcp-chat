@@ -50,14 +50,15 @@ const languageModels = {
     }
   ),
   "grok-3-mini": xaiClient("grok-3-mini-latest"),
-  "kimi-k2": groqClient('moonshotai/kimi-k2-instruct')
+  "kimi-k2": groqClient('moonshotai/kimi-k2-instruct'),
+  "llama4": groqClient('meta-llama/llama-4-scout-17b-16e-instruct')
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
   "kimi-k2": {
     provider: "Groq",
     name: "Kimi K2",
-    description: "Latest version of Moonshot AI's Kimi K2 with strong reasoning and coding capabilities.",
+    description: "Latest version of Moonshot AI's Kimi K2 with good balance of capabilities.",
     apiVersion: "kimi-k2-instruct",
     capabilities: ["Balanced", "Efficient", "Agentic"]
   },
@@ -75,6 +76,13 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "grok-3-mini-latest",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
+  "llama4": {
+    provider: "Groq",
+    name: "Llama 4",
+    description: "Latest version of Meta's Llama 4 with good balance of capabilities.",
+    apiVersion: "llama-4-scout-17b-16e-instruct",
+    capabilities: ["Balanced", "Efficient", "Agentic"]
+  }
 };
 
 // Update API keys when localStorage changes (for runtime updates)
