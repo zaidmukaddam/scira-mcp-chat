@@ -1,8 +1,8 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from "react";
 
 export function useScrollToBottom(): [
   RefObject<HTMLDivElement>,
-  RefObject<HTMLDivElement>,
+  RefObject<HTMLDivElement>
 ] {
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -16,16 +16,16 @@ export function useScrollToBottom(): [
 
     // Initial scroll to bottom
     setTimeout(() => {
-      end.scrollIntoView({ behavior: 'instant', block: 'end' });
+      end.scrollIntoView({ behavior: "instant", block: "end" });
     }, 100);
 
     // Track if user has manually scrolled up
     const handleScroll = () => {
       if (!container) return;
-      
+
       const { scrollTop, scrollHeight, clientHeight } = container;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      
+
       // If user is scrolled up, mark as manually scrolling
       isUserScrollingRef.current = distanceFromBottom > 100;
     };
@@ -35,13 +35,13 @@ export function useScrollToBottom(): [
       if (!container || !end) return;
 
       // Check if mutation is related to expand/collapse
-      const isToggleSection = mutations.some(mutation => {
+      const isToggleSection = mutations.some((mutation) => {
         // Check if the target or parent is a motion-div (expanded content)
         let target = mutation.target as HTMLElement;
         let isExpand = false;
-        
+
         while (target && target !== container) {
-          if (target.classList?.contains('motion-div')) {
+          if (target.classList?.contains("motion-div")) {
             isExpand = true;
             break;
           }
@@ -56,7 +56,7 @@ export function useScrollToBottom(): [
       // Only auto-scroll if user hasn't manually scrolled up
       if (!isUserScrollingRef.current) {
         // For new messages, use smooth scrolling
-        end.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        end.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     });
 
@@ -66,13 +66,16 @@ export function useScrollToBottom(): [
     });
 
     // Add scroll event listener
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener("scroll", handleScroll);
 
     return () => {
       observer.disconnect();
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
-  return [containerRef, endRef] as [RefObject<HTMLDivElement>, RefObject<HTMLDivElement>];
+  return [containerRef, endRef] as [
+    RefObject<HTMLDivElement>,
+    RefObject<HTMLDivElement>
+  ];
 }

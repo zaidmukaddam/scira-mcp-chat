@@ -1,14 +1,22 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CircleDashed, Flame, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "./ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { CircleDashed, Flame, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof Button>) {
-  const { setTheme } = useTheme()
+export function ThemeToggle({
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -45,5 +53,5 @@ export function ThemeToggle({ className, ...props }: React.ComponentProps<typeof
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -37,7 +37,9 @@ export function ToolInvocation({
       if (isLatestMessage && status !== "ready") {
         return <Loader2 className="animate-spin h-3.5 w-3.5 text-primary/70" />;
       }
-      return <Circle className="h-3.5 w-3.5 fill-muted-foreground/10 text-muted-foreground/70" />;
+      return (
+        <Circle className="h-3.5 w-3.5 fill-muted-foreground/10 text-muted-foreground/70" />
+      );
     }
     return <CheckCircle2 size={14} className="text-primary/90" />;
   };
@@ -69,12 +71,14 @@ export function ToolInvocation({
   };
 
   return (
-    <div className={cn(
-      "flex flex-col mb-2 rounded-md border border-border/50 overflow-hidden",
-      "bg-gradient-to-b from-background to-muted/30 backdrop-blur-sm",
-      "transition-all duration-200 hover:border-border/80 group"
-    )}>
-      <div 
+    <div
+      className={cn(
+        "flex flex-col mb-2 rounded-md border border-border/50 overflow-hidden",
+        "bg-gradient-to-b from-background to-muted/30 backdrop-blur-sm",
+        "transition-all duration-200 hover:border-border/80 group"
+      )}
+    >
+      <div
         className={cn(
           "flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors",
           "hover:bg-muted/20"
@@ -85,10 +89,16 @@ export function ToolInvocation({
           <TerminalSquare className="h-3.5 w-3.5" />
         </div>
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground flex-1">
-          <span className="text-foreground font-semibold tracking-tight">{toolName}</span>
+          <span className="text-foreground font-semibold tracking-tight">
+            {toolName}
+          </span>
           <ArrowRight className="h-3 w-3 text-muted-foreground/50" />
           <span className={cn("font-medium", getStatusClass())}>
-            {state === "call" ? (isLatestMessage && status !== "ready" ? "Running" : "Waiting") : "Completed"}
+            {state === "call"
+              ? isLatestMessage && status !== "ready"
+                ? "Running"
+                : "Waiting"
+              : "Completed"}
           </span>
         </div>
         <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
@@ -111,25 +121,29 @@ export function ToolInvocation({
                 <Code className="h-3 w-3" />
                 <span className="font-medium">Arguments</span>
               </div>
-              <pre className={cn(
-                "text-xs font-mono p-2.5 rounded-md overflow-x-auto",
-                "border border-border/40 bg-muted/10"
-              )}>
+              <pre
+                className={cn(
+                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto",
+                  "border border-border/40 bg-muted/10"
+                )}
+              >
                 {formatContent(args)}
               </pre>
             </div>
           )}
-          
+
           {!!result && (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
                 <ArrowRight className="h-3 w-3" />
                 <span className="font-medium">Result</span>
               </div>
-              <pre className={cn(
-                "text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto",
-                "border border-border/40 bg-muted/10"
-              )}>
+              <pre
+                className={cn(
+                  "text-xs font-mono p-2.5 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto",
+                  "border border-border/40 bg-muted/10"
+                )}
+              >
                 {formatContent(result)}
               </pre>
             </div>
@@ -138,4 +152,4 @@ export function ToolInvocation({
       )}
     </div>
   );
-} 
+}

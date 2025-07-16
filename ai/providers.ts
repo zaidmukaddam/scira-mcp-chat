@@ -3,10 +3,10 @@ import { createGroq } from "@ai-sdk/groq";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createXai } from "@ai-sdk/xai";
 
-import { 
-  customProvider, 
-  wrapLanguageModel, 
-  extractReasoningMiddleware 
+import {
+  customProvider,
+  wrapLanguageModel,
+  extractReasoningMiddleware
 } from "ai";
 
 export interface ModelInfo {
@@ -27,12 +27,12 @@ const getApiKey = (key: string): string | undefined => {
   if (process.env[key]) {
     return process.env[key] || undefined;
   }
-  
+
   // Fall back to localStorage if available
   if (typeof window !== 'undefined') {
     return window.localStorage.getItem(key) || undefined;
   }
-  
+
   return undefined;
 };
 
@@ -55,10 +55,10 @@ const xaiClient = createXai({
 
 const languageModels = {
   "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
-  "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
-  "qwen-qwq": wrapLanguageModel(
+  "claude-4-sonnet": anthropicClient('claude-4-sonnet-20250514'),
+  "qwen-32b": wrapLanguageModel(
     {
-      model: groqClient("qwen-qwq-32b"),
+      model: groqClient('qwen/qwen-32b'),
       middleware
     }
   ),
@@ -73,18 +73,18 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "gpt-4.1-mini",
     capabilities: ["Balance", "Creative", "Vision"]
   },
-  "claude-3-7-sonnet": {
+  "claude-4-sonnet": {
     provider: "Anthropic",
-    name: "Claude 3.7 Sonnet",
-    description: "Latest version of Anthropic's Claude 3.7 Sonnet with strong reasoning and coding capabilities.",
-    apiVersion: "claude-3-7-sonnet-20250219",
+    name: "Claude 4 Sonnet",
+    description: "Latest version of Anthropic's Claude 4 Sonnet with strong reasoning and coding capabilities.",
+    apiVersion: "claude-4-sonnet-20250514",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
-  "qwen-qwq": {
+  "qwen-32b": {
     provider: "Groq",
-    name: "Qwen QWQ",
-    description: "Latest version of Alibaba's Qwen QWQ with strong reasoning and coding capabilities.",
-    apiVersion: "qwen-qwq",
+    name: "Qwen 32B",
+    description: "Latest version of Alibaba's Qwen 32B with strong reasoning and coding capabilities.",
+    apiVersion: "qwen-32b",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
   "grok-3-mini": {
@@ -114,4 +114,4 @@ export type modelID = keyof typeof languageModels;
 
 export const MODELS = Object.keys(languageModels);
 
-export const defaultModel: modelID = "qwen-qwq";
+  export const defaultModel: modelID = "qwen-32b";

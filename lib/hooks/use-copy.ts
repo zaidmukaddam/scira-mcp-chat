@@ -9,15 +9,15 @@ export function useCopy(timeout = 2000) {
         console.error('Clipboard API not available');
         return false;
       }
-      
+
       try {
         await navigator.clipboard.writeText(text);
         setCopied(true);
-        
+
         setTimeout(() => {
           setCopied(false);
         }, timeout);
-        
+
         return true;
       } catch (error) {
         console.error('Failed to copy text:', error);

@@ -88,9 +88,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // Initialize MCP clients using the already running persistent SSE servers
-  // mcpServers now only contains SSE configurations since stdio servers
-  // have been converted to SSE in the MCP context
+  // Initialize MCP clients using the already running persistent HTTP/SSE servers
   const { tools, cleanup } = await initializeMCPClients(mcpServers, req.signal);
 
   console.log("messages", messages);

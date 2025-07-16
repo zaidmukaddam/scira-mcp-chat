@@ -38,12 +38,12 @@ export async function saveMessages({
   try {
     if (dbMessages.length > 0) {
       const chatId = dbMessages[0].chatId;
-      
+
       // First delete any existing messages for this chat
       await db
         .delete(messages)
         .where(eq(messages.chatId, chatId));
-      
+
       // Then insert the new messages
       return await db.insert(messages).values(dbMessages);
     }
@@ -59,7 +59,7 @@ export function convertToDBMessages(aiMessages: AIMessage[], chatId: string): DB
   return aiMessages.map(msg => {
     // Use existing id or generate a new one
     const messageId = msg.id || nanoid();
-    
+
     // If msg has parts, use them directly
     if (msg.parts) {
       return {
@@ -70,10 +70,10 @@ export function convertToDBMessages(aiMessages: AIMessage[], chatId: string): DB
         createdAt: new Date()
       };
     }
-    
+
     // Otherwise, convert content to parts
     let parts: MessagePart[];
-    
+
     if (typeof msg.content === 'string') {
       parts = [{ type: 'text', text: msg.content }];
     } else if (Array.isArray(msg.content)) {
@@ -88,7 +88,7 @@ export function convertToDBMessages(aiMessages: AIMessage[], chatId: string): DB
       // Default case
       parts = [{ type: 'text', text: String(msg.content) }];
     }
-    
+
     return {
       id: messageId,
       chatId,
@@ -113,16 +113,16 @@ export function convertToUIMessages(dbMessages: Array<Message>): Array<UIMessage
 export async function saveChat({ id, userId, messages: aiMessages, title }: SaveChatParams) {
   // Generate a new ID if one wasn't provided
   const chatId = id || nanoid();
-  
+
   // Check if title is provided, if not generate one
   let chatTitle = title;
-  
+
   // Generate title if messages are provided and no title is specified
   if (aiMessages && aiMessages.length > 0) {
-    const hasEnoughMessages = aiMessages.length >= 2 && 
-      aiMessages.some(m => m.role === 'user') && 
+    const hasEnoughMessages = aiMessages.length >= 2 &&
+      aiMessages.some(m => m.role === 'user') &&
       aiMessages.some(m => m.role === 'assistant');
-    
+
     if (!chatTitle || chatTitle === 'New Chat' || chatTitle === undefined) {
       if (hasEnoughMessages) {
         try {
@@ -144,7 +144,7 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
               } else {
                 chatTitle = 'New Chat';
               }
-            } 
+            }
             // Fallback to content (old format)
             else if (typeof firstUserMessage.content === 'string') {
               chatTitle = firstUserMessage.content.slice(0, 50);
@@ -204,9 +204,9 @@ export async function saveChat({ id, userId, messages: aiMessages, title }: Save
     // Update existing chat
     await db
       .update(chats)
-      .set({ 
+      .set({
         title: chatTitle,
-        updatedAt: new Date() 
+        updatedAt: new Date()
       })
       .where(and(
         eq(chats.id, chatId),

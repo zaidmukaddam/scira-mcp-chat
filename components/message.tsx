@@ -1,18 +1,22 @@
 "use client";
 
-import type { Message as TMessage } from "ai";
+import type { UIMessage as TMessage } from "ai";
 import { memo, useCallback, useEffect, useState } from "react";
 import equal from "fast-deep-equal";
 import { Markdown } from "./markdown";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, ChevronUpIcon, LightbulbIcon, BrainIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  LightbulbIcon,
+} from "lucide-react";
 import { SpinnerIcon } from "./icons";
 import { ToolInvocation } from "./tool-invocation";
 import { CopyButton } from "./copy-button";
 
 interface ReasoningPart {
   type: "reasoning";
-  reasoning: string;
+  reasoningText: string;
   details: Array<{ type: "text"; text: string }>;
 }
 
@@ -38,18 +42,20 @@ export function ReasoningMessagePart({
   return (
     <div className="flex flex-col mb-2 group">
       {isReasoning ? (
-        <div className={cn(
-          "flex items-center gap-2.5 rounded-full py-1.5 px-3",
-          "bg-indigo-50/50 dark:bg-indigo-900/10 text-indigo-700 dark:text-indigo-300",
-          "border border-indigo-200/50 dark:border-indigo-700/20 w-fit"
-        )}>
+        <div
+          className={cn(
+            "flex items-center gap-2.5 rounded-full py-1.5 px-3",
+            "bg-indigo-50/50 dark:bg-indigo-900/10 text-indigo-700 dark:text-indigo-300",
+            "border border-indigo-200/50 dark:border-indigo-700/20 w-fit"
+          )}
+        >
           <div className="animate-spin h-3.5 w-3.5">
             <SpinnerIcon />
           </div>
           <div className="text-xs font-medium tracking-tight">Thinking...</div>
         </div>
       ) : (
-        <button 
+        <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
             "flex items-center justify-between w-full",
@@ -60,11 +66,13 @@ export function ReasoningMessagePart({
           )}
         >
           <div className="flex items-center gap-2.5">
-            <div className={cn(
-              "flex items-center justify-center w-6 h-6 rounded-full",
-              "bg-amber-50 dark:bg-amber-900/20",
-              "text-amber-600 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/30",
-            )}>
+            <div
+              className={cn(
+                "flex items-center justify-center w-6 h-6 rounded-full",
+                "bg-amber-50 dark:bg-amber-900/20",
+                "text-amber-600 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/30"
+              )}
+            >
               <LightbulbIcon className="h-3.5 w-3.5" />
             </div>
             <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
@@ -74,13 +82,15 @@ export function ReasoningMessagePart({
               </span>
             </div>
           </div>
-          <div className={cn(
-            "flex items-center justify-center",
-            "rounded-full p-0.5 w-5 h-5",
-            "text-muted-foreground hover:text-foreground",
-            "bg-background/80 border border-border/50",
-            "transition-colors",
-          )}>
+          <div
+            className={cn(
+              "flex items-center justify-center",
+              "rounded-full p-0.5 w-5 h-5",
+              "text-muted-foreground hover:text-foreground",
+              "bg-background/80 border border-border/50",
+              "transition-colors"
+            )}
+          >
             {isExpanded ? (
               <ChevronDownIcon className="h-3 w-3" />
             ) : (
@@ -103,12 +113,15 @@ export function ReasoningMessagePart({
           </div>
           {part.details.map((detail, detailIndex) =>
             detail.type === "text" ? (
-              <div key={detailIndex} className="px-2 py-1.5 bg-muted/10 rounded-md border border-border/30">
+              <div
+                key={detailIndex}
+                className="px-2 py-1.5 bg-muted/10 rounded-md border border-border/30"
+              >
                 <Markdown>{detail.text}</Markdown>
               </div>
             ) : (
               "<redacted>"
-            ),
+            )
           )}
         </div>
       )}
@@ -130,13 +143,15 @@ const PurePreviewMessage = ({
   const getMessageText = () => {
     if (!message.parts) return "";
     return message.parts
-      .filter(part => part.type === "text")
-      .map(part => (part.type === "text" ? part.text : ""))
+      .filter((part) => part.type === "text")
+      .map((part) => (part.type === "text" ? part.text : ""))
       .join("\n\n");
   };
 
   // Only show copy button if the message is from the assistant and not currently streaming
-  const shouldShowCopyButton = message.role === "assistant" && (!isLatestMessage || status !== "streaming");
+  const shouldShowCopyButton =
+    message.role === "assistant" &&
+    (!isLatestMessage || status !== "streaming");
 
   return (
     <div
@@ -149,7 +164,7 @@ const PurePreviewMessage = ({
       <div
         className={cn(
           "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
-          "group-data-[role=user]/message:w-fit",
+          "group-data-[role=user]/message:w-fit"
         )}
       >
         <div className="flex flex-col w-full space-y-3">
@@ -173,8 +188,11 @@ const PurePreviewMessage = ({
                 );
               case "tool-invocation":
                 const { toolName, state, args } = part.toolInvocation;
-                const result = 'result' in part.toolInvocation ? part.toolInvocation.result : null;
-                
+                const result =
+                  "result" in part.toolInvocation
+                    ? part.toolInvocation.result
+                    : null;
+
                 return (
                   <ToolInvocation
                     key={`message-${message.id}-part-${i}`}
@@ -219,7 +237,8 @@ export const Message = memo(PurePreviewMessage, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) return false;
   if (prevProps.isLoading !== nextProps.isLoading) return false;
   if (prevProps.isLatestMessage !== nextProps.isLatestMessage) return false;
-  if (prevProps.message.annotations !== nextProps.message.annotations) return false;
+  if (prevProps.message.annotations !== nextProps.message.annotations)
+    return false;
   if (prevProps.message.id !== nextProps.message.id) return false;
   if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
   return true;

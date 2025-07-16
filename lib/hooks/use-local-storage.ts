@@ -19,7 +19,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   // Initialize state from localStorage or use initialValue
   useEffect(() => {
     if (!isBrowser) return;
-    
+
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
@@ -34,15 +34,15 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   // persists the new value to localStorage.
   const setValue = useCallback((value: SetValue<T>) => {
     if (!isBrowser) return;
-    
+
     try {
       // Allow value to be a function so we have same API as useState
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
-      
+
       // Save state
       setStoredValue(valueToStore);
-      
+
       // Save to localStorage
       if (valueToStore === undefined) {
         window.localStorage.removeItem(key);

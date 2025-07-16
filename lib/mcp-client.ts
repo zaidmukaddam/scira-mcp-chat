@@ -8,10 +8,7 @@ export interface KeyValuePair {
 
 export interface MCPServerConfig {
   url: string;
-  type: 'sse' | 'stdio';
-  command?: string;
-  args?: string[];
-  env?: KeyValuePair[];
+  type: 'sse' | 'http';
   headers?: KeyValuePair[];
 }
 
@@ -47,15 +44,15 @@ export async function initializeMCPClients(
 
       const transport = mcpServer.url.endsWith('/sse')
         ? {
-            type: 'sse' as const,
-            url: mcpServer.url,
-            headers,
-          }
+          type: 'sse' as const,
+          url: mcpServer.url,
+          headers,
+        }
         : new StreamableHTTPClientTransport(new URL(mcpServer.url), {
-            requestInit: {
-              headers,
-            },
-          });
+          requestInit: {
+            headers,
+          },
+        });
 
       const mcpClient = await createMCPClient({ transport });
       mcpClients.push(mcpClient);
@@ -86,13 +83,17 @@ export async function initializeMCPClients(
   };
 }
 
+/**
+ * Clean up MCP clients
+ */
 async function cleanupMCPClients(clients: any[]): Promise<void> {
-  // Clean up the MCP clients
-  for (const client of clients) {
-    try {
-      await client.close();
-    } catch (error) {
-      console.error("Error closing MCP client:", error);
-    }
-  }
+  await Promise.all(
+    clients.map(async (client) => {
+      try {
+        await client.disconnect?.();
+      } catch (error) {
+        console.error("Error during MCP client cleanup:", error);
+      }
+    })
+  );
 } 

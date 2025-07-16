@@ -1,4 +1,4 @@
-import type { Message as TMessage } from "ai";
+import type { UIMessage as TMessage } from "ai";
 import { Message } from "./message";
 import { useScrollToBottom } from "@/lib/hooks/use-scroll-to-bottom";
 
@@ -12,12 +12,9 @@ export const Messages = ({
   status: "error" | "submitted" | "streaming" | "ready";
 }) => {
   const [containerRef, endRef] = useScrollToBottom();
-  
+
   return (
-    <div
-      className="h-full overflow-y-auto no-scrollbar"
-      ref={containerRef}
-    >
+    <div className="h-full overflow-y-auto no-scrollbar" ref={containerRef}>
       <div className="max-w-lg sm:max-w-3xl mx-auto py-4">
         {messages.map((m, i) => (
           <Message

@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 export function useChats(userId: string) {
   const queryClient = useQueryClient();
-  
+
   // Main query to fetch chats
   const {
     data: chats = [],
@@ -15,17 +15,17 @@ export function useChats(userId: string) {
     queryKey: ['chats', userId],
     queryFn: async () => {
       if (!userId) return [];
-      
+
       const response = await fetch('/api/chats', {
         headers: {
           'x-user-id': userId
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch chats');
       }
-      
+
       return response.json();
     },
     enabled: !!userId, // Only run query if userId exists
@@ -42,19 +42,19 @@ export function useChats(userId: string) {
           'x-user-id': userId
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete chat');
       }
-      
+
       return chatId;
     },
     onSuccess: (deletedChatId) => {
       // Update cache by removing the deleted chat
-      queryClient.setQueryData<Chat[]>(['chats', userId], (oldChats = []) => 
+      queryClient.setQueryData<Chat[]>(['chats', userId], (oldChats = []) =>
         oldChats.filter(chat => chat.id !== deletedChatId)
       );
-      
+
       toast.success('Chat deleted');
     },
     onError: (error) => {
