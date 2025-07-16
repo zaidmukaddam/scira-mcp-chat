@@ -26,9 +26,9 @@ export async function POST(req: Request) {
     mcpServers?: MCPServerConfig[];
   } = await req.json();
 
-  const { isBot } = await checkBotId();
+  const { isBot, isGoodBot } = await checkBotId();
 
-  if (isBot) {
+  if (isBot && !isGoodBot) {
     return new Response(
       JSON.stringify({ error: "Bot is not allowed to access this endpoint" }),
       { status: 401, headers: { "Content-Type": "application/json" } }
