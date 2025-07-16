@@ -50,11 +50,7 @@ export default function RootLayout({
               method: "POST",
             },
             {
-              path: "/api/chats",
-              method: "GET",
-            },
-            {
-              path: "/api/chats/:id",
+              path: "/api/chats/*",
               method: "GET",
             },
           ]}
