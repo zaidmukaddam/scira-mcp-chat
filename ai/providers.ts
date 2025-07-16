@@ -58,7 +58,7 @@ const languageModels = {
   "claude-4-sonnet": anthropicClient('claude-4-sonnet-20250514'),
   "qwen-32b": wrapLanguageModel(
     {
-      model: groqClient('qwen/qwen-32b'),
+      model: groqClient('qwen/qwen3-32b'),
       middleware
     }
   ),
